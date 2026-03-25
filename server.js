@@ -86,7 +86,9 @@ seedTable('users',       'users.json',       r => r.username);
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
 function readTable(table) {
-  const orderBy = table === 'governance' ? 'ORDER BY position' : 'ORDER BY id';
+  const orderBy = table === 'governance' ? 'ORDER BY position'
+                : table === 'users'      ? 'ORDER BY username'
+                : 'ORDER BY id';
   return db.prepare('SELECT data FROM ' + table + ' ' + orderBy)
            .all()
            .map(r => JSON.parse(r.data));

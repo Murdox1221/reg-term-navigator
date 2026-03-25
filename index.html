@@ -1119,7 +1119,7 @@ function makeSearchable(selectEl) {
   }
 
   function openDropdown() {
-    renderDropdown(input.value);
+    renderDropdown(''); // always show all options on open
     dropdown.classList.add('open');
   }
 
@@ -1137,7 +1137,10 @@ function makeSearchable(selectEl) {
     dropdown.classList.remove('open');
   }
 
-  input.addEventListener('focus', function() { input.select(); openDropdown(); });
+  input.addEventListener('focus', function() {
+    input.select();
+    openDropdown();
+  });
   input.addEventListener('input', function() { renderDropdown(input.value); dropdown.classList.add('open'); });
   input.addEventListener('keydown', function(e) {
     var items = dropdown.querySelectorAll('.ss-option');

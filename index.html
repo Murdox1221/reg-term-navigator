@@ -858,7 +858,7 @@ function csRenderNode(secId, node, path, depth){
   const defaultColor = depthColors[Math.min(depth, depthColors.length-1)];
   const indent = depth * 16;
   const label = depth === 0 ? 'Section' : 'Sub-Section';
-  const canGoDeeper = depth < 2;
+  const canGoDeeper = depth < 5;
 
   let childrenHtml = '';
   (node.children||[]).forEach(function(child, ci){

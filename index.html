@@ -2403,7 +2403,7 @@ function renderContentSectionList(){
   const list = document.getElementById('contentSectionList');
   if(!list) return;
   const customs = loadCustomSections();
-  let out = '<div style="padding:6px 14px 4px;font-size:10px;font-family:var(--mono);text-transform:uppercase;letter-spacing:.07em;color:var(--text3);background:var(--surface2);border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between"><span>Governance</span><button class="btn btn-sm" onclick="event.stopPropagation();contentNewCustomSection()" style="height:18px;padding:0 8px;font-size:10px">+ New</button></div>';
+  let out = '<div style="padding:6px 14px 4px;font-size:10px;font-family:var(--mono);text-transform:uppercase;letter-spacing:.07em;color:var(--text3);background:var(--surface2);border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between"><span>Governance</span></div>';
   if(customs.length === 0){
     out += '<div style="padding:20px 14px;font-size:11px;color:var(--text3);line-height:1.6">No governance sections yet.<br>Click <strong>+ New</strong> to create your first.</div>';
   } else {
@@ -2449,6 +2449,13 @@ function switchAdminTab(tab){
   if(tab==='source'){ try{ renderGovSourceList(); }catch(e){ console.error('gov',e); } }
   if(tab==='management'){ try{ renderMgmtUserList(); }catch(e){ console.error('mgmt',e); } }
   if(tab==='content'){ try{ renderContentSectionList(); }catch(e){ console.error('content',e); } }
+  // Show contextual New button based on active tab
+  const btnDef = document.getElementById('btnNewTerm');
+  const btnSrc = document.getElementById('btnNewSource');
+  const btnGov = document.getElementById('btnNewGov');
+  if(btnDef) btnDef.style.display = tab === 'definitions' ? '' : 'none';
+  if(btnSrc) btnSrc.style.display = tab === 'source'      ? '' : 'none';
+  if(btnGov) btnGov.style.display = tab === 'content'     ? '' : 'none';
 }
 
 
@@ -2572,6 +2579,9 @@ function rebuildNavTabs(){
     </div>
     <div style="flex:1"></div>
     <span id="adminSaveStatus" style="font-size:11px;font-family:var(--mono);color:var(--text3)"></span>
+    <button class="btn btn-accent" id="btnNewTerm" onclick="switchAdminTab('definitions');adminNewTerm()" style="display:none">+ New Definition</button>
+    <button class="btn btn-accent" id="btnNewSource" onclick="govNewSource()" style="display:none">+ New Source</button>
+    <button class="btn btn-accent" id="btnNewGov" onclick="contentNewCustomSection()" style="display:none">+ New Governance</button>
     <button class="btn" onclick="importJSON()">↑ Import</button>
     <button class="btn" onclick="exportJSON()">↓ Export</button>
     <button class="btn btn-accent" onclick="adminSaveAll()">💾 Save all changes</button>
@@ -2612,7 +2622,7 @@ function rebuildNavTabs(){
         </div>
         <div id="govSourceList" style="flex:1;overflow-y:auto"></div>
         <div style="padding:12px;border-top:1px solid var(--border)">
-          <button class="btn btn-accent" style="width:100%" onclick="govNewSource()">+ Add Source Document</button>
+
         </div>
       </div>
 

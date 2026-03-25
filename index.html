@@ -294,14 +294,19 @@ body{font-family:var(--sans);background:var(--bg);color:var(--text);min-height:1
     <h2>Add new term</h2>
     <p class="msub">Use [[double brackets]] in the definition to create clickable links.</p>
     <div class="field"><label>Term / acronym *</label><input id="fTerm" placeholder="e.g. SCADA, CUI, PLC"></div>
-    <div class="field"><label>Source document *</label><input id="fSource" placeholder="e.g. NIST SP 800-53, 32 CFR § 170.4"></div>
+    <div class="field">
+      <label>Source document *</label>
+      <select id="fSource" style="width:100%;height:32px;padding:0 10px;border:1px solid var(--border2);border-radius:var(--r);font-size:12px;font-family:var(--sans);background:var(--surface2);color:var(--text);outline:none">
+        <option value="">— select a source —</option>
+      </select>
+      <div class="hint" id="fSourceHint" style="display:none;color:#f59e0b">No sources defined yet — go to Admin → Source tab to add one first.</div>
+    </div>
     <div class="field"><label>Section / citation</label><input id="fSection" placeholder="e.g. § 3.1"></div>
     <div class="field">
       <label>Definition *</label>
       <textarea id="fDef" placeholder="e.g. A system that monitors [[ICS]] and related [[OT]] devices..."></textarea>
       <div class="hint">Phrases in [[brackets]] become clickable links if a matching term exists.</div>
     </div>
-    <div class="field"><label>Categories (comma-separated)</label><input id="fCats" placeholder="e.g. CMMC, NIST Glossary, 32 CFR 170"></div>
     <div class="mactions">
       <button class="btn" id="cancelBtn">Cancel</button>
       <button class="btn btn-accent" id="saveBtn">Save term</button>
@@ -510,7 +515,7 @@ function renderTermDetail(id){
   const aliasHtml = (d.aliases && d.aliases.length)
     ? `<div style="font-size:11px;font-family:var(--mono);color:var(--text3);margin-top:4px">Also known as: ${d.aliases.map(a=>`<span style="background:var(--surface2);border:1px solid var(--border);border-radius:var(--r);padding:1px 7px;margin-right:4px;display:inline-block">${escHtml(a)}</span>`).join('')}</div>`
     : '';
-  panel.innerHTML=`<div class="term-detail">${chain}<div class="tdh"><div><div class="tdterm">${d.term}</div>${aliasHtml}</div><div style="display:flex;flex-direction:column;align-items:flex-end;gap:4px"><span class="src-badge ${sc}">${d.source}</span><div class="tdsec">${d.section}</div></div></div><div style="margin:6px 0 10px">${authBadge}</div><div class="tddef">${renderDefText(d.rawDef)}</div><div class="tdcats">${d.cats.map(c=>`<span class="cat-tag">${c}</span>`).join('')}</div>${alsoHtml}<div class="tdstats"><div class="tds">chain: <b>${trail.length}</b></div><div class="tds">visited: <b>${visited.size}</b></div></div></div>`;
+  panel.innerHTML=`<div class="term-detail">${chain}<div class="tdh"><div><div class="tdterm">${d.term}</div>${aliasHtml}</div><div style="display:flex;flex-direction:column;align-items:flex-end;gap:4px"><span class="src-badge ${sc}">${d.source}</span><div class="tdsec">${d.section}</div></div></div><div style="margin:6px 0 10px">${authBadge}</div><div class="tddef">${renderDefText(d.rawDef)}${alsoHtml}<div class="tdstats"><div class="tds">chain: <b>${trail.length}</b></div><div class="tds">visited: <b>${visited.size}</b></div></div></div>`;
 }
 
 
@@ -522,13 +527,12 @@ function toggleAlsoAlt(termId,idx){
 
 
 function renderFilters(){
-  const cats=[...new Set(DB.flatMap(d=>d.cats))].sort();
+  const sources=[...new Set(DB.map(d=>d.source).filter(Boolean))].sort();
   const sel=document.getElementById('govSelect');
   if(!sel)return;
   const prev=sel.value;
-  sel.innerHTML='<option value="">All Sources</option>'+cats.map(c=>`<option value="${c}"${activeFilter===c?' selected':''}>${c}</option>`).join('');
-  // Restore previous selection if still valid
-  if(prev&&cats.includes(prev))sel.value=prev;
+  sel.innerHTML='<option value="">All Sources</option>'+sources.map(s=>`<option value="${escHtml(s)}"${activeFilter===s?' selected':''}>${escHtml(s)}</option>`).join('');
+  if(prev&&sources.includes(prev))sel.value=prev;
 }
 function setFilter(f){
   activeFilter=f||null;
@@ -540,7 +544,7 @@ function renderTermListView(){
   const items=DB.filter(d=>{
     const q=defQ.toLowerCase();
     const mq=!q||d.term.toLowerCase().includes(q)||d.rawDef.toLowerCase().includes(q)||d.source.toLowerCase().includes(q);
-    const mf=!activeFilter||d.cats.includes(activeFilter);return mq&&mf;
+    const mf=!activeFilter||d.source===activeFilter;return mq&&mf;
   });
   const cur=trail.length?trail[trail.length-1]:null;
   const p=document.getElementById('defContent');
@@ -549,7 +553,7 @@ function renderTermListView(){
     const sc=srcClass(d.source);
     return`<div class="tli${d.id===cur?' active':''}" onclick="navTo('${d.id.replace(/'/g,"\\'")}',true)">
       <div class="tli-main"><div class="tli-n">${d.term}${visited.has(d.id)&&d.id!==cur?' <span class="tli-v">visited</span>':''}</div><div class="tli-s">${d.source}</div></div>
-      <span class="src-badge ${sc}" style="margin-top:2px">${d.cats[0]||''}</span>
+      <span class="src-badge ${sc}" style="margin-top:2px">${escHtml(d.source||'')}</span>
     </div>`;
   }).join('');
 }
@@ -589,10 +593,10 @@ function switchGuide(name){
 
 function renderGlossaryGuide(){
   const q=guideQ.toLowerCase();
-  const items=DB.filter(d=>!q||d.term.toLowerCase().includes(q)||d.source.toLowerCase().includes(q)||(d.cats||[]).some(c=>c.toLowerCase().includes(q)));
+  const items=DB.filter(d=>!q||d.term.toLowerCase().includes(q)||d.source.toLowerCase().includes(q));
   const grouped={};
   items.forEach(d=>{
-    const c=d.cats[0]||'Other';
+    const c=d.source||'Other';
     if(!grouped[c])grouped[c]=[];grouped[c].push(d);
   });
   const keys=Object.keys(grouped).sort((a,b)=>a.localeCompare(b));
@@ -620,12 +624,22 @@ document.getElementById('gsearch').addEventListener('input',e=>{
 
 document.getElementById('cancelBtn').addEventListener('click',()=>document.getElementById('mo').classList.remove('open'));
 document.getElementById('mo').addEventListener('click',e=>{if(e.target===document.getElementById('mo'))document.getElementById('mo').classList.remove('open');});
+// Populate modal source dropdown whenever it opens
+function populateModalSourceDropdown(){
+  const sel = document.getElementById('fSource');
+  const hint = document.getElementById('fSourceHint');
+  if(!sel) return;
+  const srcs = _sources && _sources.length ? _sources : [];
+  sel.innerHTML = '<option value="">— select a source —</option>'
+    + srcs.map(s => `<option value="${escHtml(s.name)}">${escHtml(s.name)}</option>`).join('');
+  if(hint) hint.style.display = srcs.length ? 'none' : '';
+}
+
 document.getElementById('saveBtn').addEventListener('click', async () => {
-  const term = document.getElementById('fTerm').value.trim();
-  const source = document.getElementById('fSource').value.trim();
+  const term    = document.getElementById('fTerm').value.trim();
+  const source  = document.getElementById('fSource').value.trim();
   const section = document.getElementById('fSection').value.trim();
-  const def = document.getElementById('fDef').value.trim();
-  const cats = document.getElementById('fCats').value.split(',').map(s=>s.trim()).filter(Boolean);
+  const def     = document.getElementById('fDef').value.trim();
 
   if(!term || !source || !def){
     alert('Term, source, and definition are required.');
@@ -637,20 +651,15 @@ document.getElementById('saveBtn').addEventListener('click', async () => {
     term,
     source,
     section: section || '—',
-    cats: cats.length ? cats : ['Custom'],
+    cats: [source],
     rawDef: def
   };
 
-  await fetch('/api/terms', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(entry)
-  });
-
+  DB.push(entry);
+  saveDB();
   document.getElementById('mo').classList.remove('open');
-
-  await loadData(); // 🔥 THIS IS THE KEY
-
+  renderFilters();
+  switchGuide(curGuide);
   toast(`"${term}" saved`);
 });
 
@@ -1009,11 +1018,13 @@ let adminDraft = {};        // id → draft copy of term object
 // closeAdmin: replaced by management auth version
 
 function populateAdminSourceFilter(){
-  const sources = [...new Set(DB.map(d => d.source))].sort();
+  const sources = _sources && _sources.length
+    ? _sources.map(s => s.name).sort()
+    : [...new Set(DB.map(d => d.source))].sort(); // fallback if no sources defined yet
   const sel = document.getElementById('adminSourceFilter');
   const prev = sel.value;
   sel.innerHTML = '<option value="">All sources</option>' +
-    sources.map(s => `<option value="${s}"${prev===s?' selected':''}>${s}</option>`).join('');
+    sources.map(s => `<option value="${escHtml(s)}"${prev===s?' selected':''}>${escHtml(s)}</option>`).join('');
 }
 
 function renderAdminList(){
@@ -1127,7 +1138,14 @@ function renderAdminEditor(id){
         </div>
         <div class="admin-field">
           <label>Source document *</label>
-          <input id="af-source" value="${escHtml(draft.source||'')}" oninput="adminFieldChange('source',this.value)">
+          ${(()=>{
+            const srcs = _sources && _sources.length ? _sources : [];
+            if(!srcs.length) return '<div style="font-size:11px;color:#f59e0b;font-family:var(--mono);padding:6px 10px;background:#fef3c7;border-radius:var(--r);border:1px solid #fcd34d">No sources defined yet — go to the <strong>Source</strong> tab to add one first.</div>';
+            return '<select id="af-source" onchange="adminFieldChange(&quot;source&quot;,this.value)" style="width:100%;padding:8px 10px;border:1px solid var(--border2);border-radius:var(--r);font-size:12px;font-family:var(--sans);background:var(--surface2);color:var(--text);outline:none">'
+              + '<option value="">— select a source —</option>'
+              + srcs.map(s => `<option value="${escHtml(s.name)}"${draft.source===s.name?' selected':''}>${escHtml(s.name)}</option>`).join('')
+              + '</select>';
+          })()}
         </div>
         <div class="admin-field">
           <label>Section / Citation</label>
@@ -1140,16 +1158,6 @@ function renderAdminEditor(id){
         <textarea id="af-rawDef" rows="6" oninput="adminFieldChange('rawDef',this.value)">${escHtml(draft.rawDef||'')}</textarea>
         <div style="font-size:10px;font-family:var(--mono);color:var(--text3);margin-top:4px">
           Tip: [[Term]] creates a clickable link · [[Term|display text]] creates a link with custom label
-        </div>
-      </div>
-
-      <!-- Governance / Cats -->
-      <div class="admin-section-hd">Source (tags)</div>
-      <div class="admin-field">
-        <label>Tags — press Enter or comma to add</label>
-        <div class="admin-tag-row" id="admin-cats-row">
-          ${(draft.cats||[]).map((c,i) => `<span class="admin-tag">${escHtml(c)}<button onclick="adminRemoveCat(${i})" title="Remove">×</button></span>`).join('')}
-          <input id="admin-cats-input" style="border:none;background:none;outline:none;font-size:11px;color:var(--text);min-width:120px;padding:2px 4px" placeholder="Add tag…" onkeydown="adminCatKeydown(event)">
         </div>
       </div>
 
@@ -1207,43 +1215,6 @@ function adminToggleAuth(){
   markDirty(adminEditing);
 }
 
-function adminRemoveCat(idx){
-  const draft = getDraft(adminEditing);
-  if(!draft) return;
-  draft.cats = (draft.cats||[]).filter((_,i) => i !== idx);
-  markDirty(adminEditing);
-  // Re-render just the cats row
-  const row = document.getElementById('admin-cats-row');
-  const input = document.getElementById('admin-cats-input');
-  if(row && input){
-    const newTags = (draft.cats||[]).map((c,i) =>
-      `<span class="admin-tag">${escHtml(c)}<button onclick="adminRemoveCat(${i})" title="Remove">×</button></span>`
-    ).join('');
-    row.innerHTML = newTags + input.outerHTML;
-  }
-}
-
-function adminCatKeydown(e){
-  if(e.key === 'Enter' || e.key === ','){
-    e.preventDefault();
-    const val = e.target.value.trim().replace(/,$/, '');
-    if(!val) return;
-    const draft = getDraft(adminEditing);
-    if(!draft) return;
-    if(!(draft.cats||[]).includes(val)){
-      draft.cats = [...(draft.cats||[]), val];
-      markDirty(adminEditing);
-    }
-    e.target.value = '';
-    // Re-render cats
-    const row = document.getElementById('admin-cats-row');
-    if(row){
-      row.innerHTML = (draft.cats||[]).map((c,i) =>
-        `<span class="admin-tag">${escHtml(c)}<button onclick="adminRemoveCat(${i})" title="Remove">×</button></span>`
-      ).join('') + `<input id="admin-cats-input" style="border:none;background:none;outline:none;font-size:11px;color:var(--text);min-width:120px;padding:2px 4px" placeholder="Add tag…" onkeydown="adminCatKeydown(event)">`;
-    }
-  }
-}
 
 function adminRemoveAlias(idx){
   const draft = getDraft(adminEditing);
@@ -1375,7 +1346,7 @@ function adminNewTerm(){
   const newId = 'new-term-' + Date.now();
   const newEntry = {
     id: newId, term: 'New Term', source: '', section: '',
-    cats: [], rawDef: '', authoritative: true, alsoIn: [], _new: true
+    rawDef: '', authoritative: true, alsoIn: [], aliases: [], _new: true
   };
   DB.push(newEntry);
   adminDraft[newId] = JSON.parse(JSON.stringify(newEntry));
@@ -1687,12 +1658,7 @@ function govRenameSource(id){
 
   // Update all DB entries that reference this source
   DB.forEach(d => {
-    if(d.source === oldName){
-      d.source = newName;
-      if(d.cats && d.cats.includes(oldName)){
-        d.cats = d.cats.map(c => c === oldName ? newName : c);
-      }
-    }
+    if(d.source === oldName) d.source = newName;
   });
 
   // Update govDocs entry

@@ -872,6 +872,27 @@ function csGetDraft(secId){
   return contentCustomDraft[secId];
 }
 
+function csSourceSelected(sel){
+  // When a source is selected in the governance editor, update abbrev + description display
+  const sid = sel.closest('[data-sec]') ? sel.closest('[data-sec]').dataset.sec : null;
+  if(!sid) return;
+  const name = sel.value;
+  const src = loadGovDocs().find(function(s){ return s.name === name; });
+  const abbrevEl = document.getElementById('gov-abbrev-'+sid);
+  const descEl   = document.getElementById('gov-desc-'+sid);
+  if(abbrevEl) abbrevEl.textContent = src && src.abbrev ? src.abbrev : '—';
+  if(descEl)   descEl.textContent   = src && src.description ? src.description : '—';
+  // Also update the heading
+  const heading = sel.closest('.admin-editor, div[style]') ? sel.closest('div[style*="max-width"]') : null;
+  const headEl = heading ? heading.querySelector('div[style*="font-size:18px"]') : null;
+  if(headEl) headEl.textContent = name || 'New Governance';
+  // Update the draft
+  csUpdateMeta(sid, 'title', name);
+  // Also store subtitle from source description for display purposes
+  const src2 = loadGovDocs().find(function(s){ return s.name === name; });
+  if(src2) csUpdateMeta(sid, 'subtitle', src2.abbrev || '');
+}
+
 function csUpdateMeta(secId, field, value){
   csGetDraft(secId)[field] = value;
   markContentDirty('custom_'+secId);
@@ -1011,8 +1032,17 @@ function renderCustomSectionEditor(editor, secId){
     + '</div>'
     + '<div class="admin-section-hd">Governance identity</div>'
     + '<div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:18px">'
-    + '<div class="admin-field"><label>Governance title *</label><input class="cs-meta" data-sec="'+escHtml(sid)+'" data-field="title" value="'+escHtml(draft.title||'')+'" placeholder="e.g. NIST 800-53, ISO 27001"></div>'
-    + '<div class="admin-field"><label>Subtitle</label><input class="cs-meta" data-sec="'+escHtml(sid)+'" data-field="subtitle" value="'+escHtml(draft.subtitle||'')+'" placeholder="Brief description"></div>'
+    + (function(){
+        var srcs = loadGovDocs().sort(function(a,b){return a.name.localeCompare(b.name);});
+        var selOpts = srcs.length
+          ? '<option value="">— select a source —</option>' + srcs.map(function(s){return '<option value="'+escHtml(s.name)+'"'+(draft.title===s.name?' selected':'')+'>'+escHtml(s.name)+'</option>';}).join('')
+          : '<option value="">— no sources defined yet —</option>';
+        var selSrc = srcs.find(function(s){return s.name===draft.title;});
+        return '<div class="admin-field"><label>Source document *</label>'
+          + '<select class="cs-meta" data-sec="'+escHtml(sid)+'" data-field="title" id="gov-src-sel-'+sid+'" onchange="csSourceSelected(this)">'+selOpts+'</select></div>'
+          + '<div class="admin-field"><label>Short name</label><div style="padding:8px 10px;border:1px solid var(--border);border-radius:var(--r);font-size:12px;background:var(--surface2);color:var(--text2);min-height:36px" id="gov-abbrev-'+sid+'">'+escHtml(selSrc&&selSrc.abbrev||'—')+'</div></div>'
+          + '<div class="admin-field" style="grid-column:1/-1"><label>Description</label><div style="padding:8px 10px;border:1px solid var(--border);border-radius:var(--r);font-size:12px;background:var(--surface2);color:var(--text2);min-height:52px;line-height:1.6" id="gov-desc-'+sid+'">'+escHtml(selSrc&&selSrc.description||'—')+'</div></div>';
+      })()
     + '</div>'
     + '<div class="admin-section-hd" style="display:flex;align-items:center;justify-content:space-between">'
     + '<span>Sections <span style="font-weight:400;color:var(--text3)">('+((draft.sections||[]).length)+')</span></span>'
@@ -2292,7 +2322,7 @@ function rebuildNavTabs(){
       <button class="admin-tab active" id="tabDefinitions" onclick="switchAdminTab('definitions')">Definitions</button>
       <button class="admin-tab" id="tabSource" onclick="switchAdminTab('source')">Source</button>
       <button class="admin-tab" id="tabManagement" onclick="switchAdminTab('management')">Management</button>
-      <button class="admin-tab" id="tabContent" onclick="switchAdminTab('content')">Content</button>
+      <button class="admin-tab" id="tabContent" onclick="switchAdminTab('content')">Governance</button>
     </div>
     <div style="flex:1"></div>
     <span id="adminSaveStatus" style="font-size:11px;font-family:var(--mono);color:var(--text3)"></span>

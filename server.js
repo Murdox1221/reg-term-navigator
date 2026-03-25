@@ -8,12 +8,9 @@ const Database = require('better-sqlite3');
 const app     = express();
 const PORT    = process.env.PORT || 3000;
 // DATA_DIR: where the SQLite db lives (persistent, writable)
+// Set RENDER_DISK_PATH to the exact directory you want the db in e.g. /data/db
 // SEED_DIR: where the seed JSON files live (in the repo, read-only)
-// __dirname is the app root — on Render this is the same as the disk mount.
-// We store the db in a 'db' subfolder to keep it separate from repo files.
-const DATA_DIR = process.env.RENDER_DISK_PATH
-  ? path.join(process.env.RENDER_DISK_PATH, 'db')
-  : path.join(__dirname, 'db');
+const DATA_DIR = process.env.RENDER_DISK_PATH || path.join(__dirname, 'db');
 const DB_PATH  = path.join(DATA_DIR, 'regnav.db');
 const SEED_DIR = path.join(__dirname, 'data');
 

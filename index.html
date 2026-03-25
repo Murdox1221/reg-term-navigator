@@ -462,32 +462,72 @@ function navToContent(secId, title, reset){
 function findTerm(phrase){
   const p = phrase.toLowerCase().trim();
   const pn = normalize(p);
-  return DB.find(d => {
-    const id = d.id.toLowerCase();
+  if(!p) return null;
+
+  // Score each candidate — higher = better match. Return highest scorer.
+  // Priority:
+  //   5 = exact id/term match
+  //   4 = normalized exact match
+  //   3 = exact alias match
+  //   2 = normalized alias match
+  //   1 = phrase IS contained in term (e.g. phrase="CUI" found in "CUI Definition")
+  //   0 = term is contained in phrase (substring, lowest priority, often false positive)
+  // Ties broken by shorter term (more specific wins)
+
+  let best = null;
+  let bestScore = -1;
+
+  DB.forEach(function(d) {
+    const id   = d.id.toLowerCase();
     const term = d.term.toLowerCase();
-    const idn = normalize(id);
+    const idn  = normalize(id);
     const termn = normalize(term);
-    // Exact match first
-    if(id === p || term === p) return true;
-    // Normalized exact match
-    if(idn === pn || termn === pn) return true;
-    // Substring (original phrase contains term, or term contains phrase)
-    if(term.includes(p) || p.includes(term)) return true;
-    // Normalized substring
-    if(termn.includes(pn) || pn.includes(termn)) return true;
-    // Check aliases
-    if(d.aliases && d.aliases.length){
-      return d.aliases.some(function(alias){
+    let score = -1;
+
+    if(id === p || term === p) {
+      score = 5;
+    } else if(idn === pn || termn === pn) {
+      score = 4;
+    } else if(d.aliases && d.aliases.length) {
+      for(const alias of d.aliases) {
         const a = alias.toLowerCase().trim();
         const an = normalize(a);
-        if(a === p || an === pn) return true;
-        if(a.includes(p) || p.includes(a)) return true;
-        if(an.includes(pn) || pn.includes(an)) return true;
-        return false;
-      });
+        if(a === p || an === pn) { score = Math.max(score, 3); break; }
+        if(an === pn)            { score = Math.max(score, 3); break; }
+      }
+      if(score < 3) {
+        for(const alias of d.aliases) {
+          const a = alias.toLowerCase().trim();
+          const an = normalize(a);
+          if(p.includes(a) && a.length > 3)  { score = Math.max(score, 2); }
+          if(pn.includes(an) && an.length > 3){ score = Math.max(score, 2); }
+        }
+      }
     }
-    return false;
+
+    // Only fall back to substring if no better match found
+    if(score < 0) {
+      // phrase contains term exactly as a whole word (e.g. "Information Systems" contains "Information")
+      // Use word-boundary check to avoid "Info" matching "Information"
+      if(p === term || pn === termn) {
+        score = 5; // already handled above but safety
+      } else if(p.includes(term) && term.length > 3) {
+        // Only if phrase contains the WHOLE term, not just part of it
+        score = 1;
+      }
+      // term contains phrase — lowest priority, only if phrase is reasonably long (>4 chars)
+      if(score < 0 && term.includes(p) && p.length > 4) {
+        score = 0;
+      }
+    }
+
+    if(score > bestScore || (score === bestScore && best && d.term.length < best.term.length)) {
+      bestScore = score;
+      best = d;
+    }
   });
+
+  return bestScore >= 0 ? best : null;
 }
 // ── Quill editor registry ─────────────────────────────────────────────────────
 const _quillInstances = {};
@@ -715,12 +755,13 @@ function renderTermDetail(id){
   const aliasHtml = (d.aliases && d.aliases.length)
     ? `<div style="font-size:11px;font-family:var(--mono);color:var(--text3);margin-top:4px">Also known as: ${d.aliases.map(a=>`<span style="background:var(--surface2);border:1px solid var(--border);border-radius:var(--r);padding:1px 7px;margin-right:4px;display:inline-block">${escHtml(a)}</span>`).join('')}</div>`
     : '';
-  // Look up source URL from _sources
-  // Find matching governance section by source name
+  // Look up abbrev from _sources, fall back to full name
+  const srcMeta   = (_sources||[]).find(function(s){ return s.name === d.source; });
+  const srcLabel  = (srcMeta && srcMeta.abbrev) ? srcMeta.abbrev : d.source;
   const srcGovSec = loadCustomSections().find(function(s){ return s.title === d.source; });
   const srcBadge = srcGovSec
-    ? `<span class="src-badge ${sc}" style="cursor:pointer" onclick="navToContent('${srcGovSec.id.replace(/'/g,"\'")}','${srcGovSec.title.replace(/'/g,"\'")}',false)" title="View governance: ${escHtml(srcGovSec.title)}">${escHtml(d.source)} ↗</span>`
-    : `<span class="src-badge ${sc}">${escHtml(d.source)}</span>`;
+    ? `<span class="src-badge ${sc}" style="cursor:pointer" onclick="navToContent('${srcGovSec.id.replace(/'/g,"\'")}','${srcGovSec.title.replace(/'/g,"\'")}',false)" title="${escHtml(d.source)}">${escHtml(srcLabel)} ↗</span>`
+    : `<span class="src-badge ${sc}" title="${escHtml(d.source)}">${escHtml(srcLabel)}</span>`;
   panel.innerHTML=`<div class="term-detail"><div class="tdh"><div><div class="tdterm">${d.term}</div>${aliasHtml}</div><div style="display:flex;flex-direction:column;align-items:flex-end;gap:4px">${srcBadge}<div class="tdsec">${escHtml(d.section||'')}</div></div></div><div style="margin:6px 0 10px">${authBadge}</div><div class="tddef">${renderDefText(d.rawDef)}${alsoHtml}</div>`;
 }
 
@@ -759,7 +800,7 @@ function renderTermListView(){
     const sc=srcClass(d.source);
     return`<div class="tli${d.id===cur?' active':''}" onclick="navTo('${d.id.replace(/'/g,"\\'")}',true)">
       <div class="tli-main"><div class="tli-n">${d.term}${visited.has(d.id)&&d.id!==cur?' <span class="tli-v">visited</span>':''}</div><div class="tli-s">${d.source}</div></div>
-      <span class="src-badge ${sc}" style="margin-top:2px">${escHtml(d.source||'')}</span>
+      <span class="src-badge ${sc}" style="margin-top:2px">${escHtml(((_sources||[]).find(s=>s.name===d.source)||{}).abbrev||d.source||'')}</span>
     </div>`;
   }).join('');
 }

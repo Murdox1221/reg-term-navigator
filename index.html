@@ -412,6 +412,17 @@ function findTerm(phrase){
     if(term.includes(p) || p.includes(term)) return true;
     // Normalized substring
     if(termn.includes(pn) || pn.includes(termn)) return true;
+    // Check aliases
+    if(d.aliases && d.aliases.length){
+      return d.aliases.some(function(alias){
+        const a = alias.toLowerCase().trim();
+        const an = normalize(a);
+        if(a === p || an === pn) return true;
+        if(a.includes(p) || p.includes(a)) return true;
+        if(an.includes(pn) || pn.includes(an)) return true;
+        return false;
+      });
+    }
     return false;
   });
 }
@@ -496,7 +507,10 @@ function renderTermDetail(id){
       ${altLinks}
     </div>`;
   }
-  panel.innerHTML=`<div class="term-detail">${chain}<div class="tdh"><div class="tdterm">${d.term}</div><div style="display:flex;flex-direction:column;align-items:flex-end;gap:4px"><span class="src-badge ${sc}">${d.source}</span><div class="tdsec">${d.section}</div></div></div><div style="margin:6px 0 10px">${authBadge}</div><div class="tddef">${renderDefText(d.rawDef)}</div><div class="tdcats">${d.cats.map(c=>`<span class="cat-tag">${c}</span>`).join('')}</div>${alsoHtml}<div class="tdstats"><div class="tds">chain: <b>${trail.length}</b></div><div class="tds">visited: <b>${visited.size}</b></div></div></div>`;
+  const aliasHtml = (d.aliases && d.aliases.length)
+    ? `<div style="font-size:11px;font-family:var(--mono);color:var(--text3);margin-top:4px">Also known as: ${d.aliases.map(a=>`<span style="background:var(--surface2);border:1px solid var(--border);border-radius:var(--r);padding:1px 7px;margin-right:4px;display:inline-block">${escHtml(a)}</span>`).join('')}</div>`
+    : '';
+  panel.innerHTML=`<div class="term-detail">${chain}<div class="tdh"><div><div class="tdterm">${d.term}</div>${aliasHtml}</div><div style="display:flex;flex-direction:column;align-items:flex-end;gap:4px"><span class="src-badge ${sc}">${d.source}</span><div class="tdsec">${d.section}</div></div></div><div style="margin:6px 0 10px">${authBadge}</div><div class="tddef">${renderDefText(d.rawDef)}</div><div class="tdcats">${d.cats.map(c=>`<span class="cat-tag">${c}</span>`).join('')}</div>${alsoHtml}<div class="tdstats"><div class="tds">chain: <b>${trail.length}</b></div><div class="tds">visited: <b>${visited.size}</b></div></div></div>`;
 }
 
 
@@ -942,7 +956,7 @@ function renderCustomSectionEditor(editor, secId){
     + (sectionsHtml || '<div style="padding:20px 0;font-size:12px;color:var(--text3)">No sections yet. Click <strong>+ Add section</strong> to begin.</div>')
     + '<div style="display:flex;gap:10px;padding-top:16px;border-top:1px solid var(--border);margin-top:16px">'
     + '<button class="btn btn-accent cs-save-gov" data-sec="'+escHtml(sid)+'">💾 Save</button>'
-    + '<button class="btn cs-discard-gov" data-sec="'+escHtml(sid)+'">↺ Discard</button>'
+    + '<button class="btn cs-discard-gov" data-sec="'+escHtml(sid)+'">↺ Discard Changes</button>'
     + '</div>'
     + '</div>';
 }
@@ -1139,6 +1153,16 @@ function renderAdminEditor(id){
         </div>
       </div>
 
+      <!-- Aliases -->
+      <div class="admin-section-hd">Aliases <span style="font-weight:400;color:var(--text3)">(${(draft.aliases||[]).length} alias${(draft.aliases||[]).length!==1?'es':''})</span></div>
+      <div class="admin-field">
+        <label>Other names / acronyms that link to this definition — press Enter or comma to add</label>
+        <div class="admin-tag-row" id="admin-aliases-row">
+          ${(draft.aliases||[]).map((a,i) => `<span class="admin-tag">${escHtml(a)}<button onclick="adminRemoveAlias(${i})" title="Remove">×</button></span>`).join('')}
+          <input id="admin-aliases-input" style="border:none;background:none;outline:none;font-size:11px;color:var(--text);min-width:120px;padding:2px 4px" placeholder="e.g. Controlled Unclassified Information…" onkeydown="adminAliasKeydown(event)">
+        </div>
+      </div>
+
       <!-- Authoritative -->
       <div class="admin-section-hd">Authoritative status</div>
       <div class="admin-auth-toggle${isAuth?' active':''}" id="admin-auth-toggle" onclick="adminToggleAuth()">
@@ -1217,6 +1241,40 @@ function adminCatKeydown(e){
       row.innerHTML = (draft.cats||[]).map((c,i) =>
         `<span class="admin-tag">${escHtml(c)}<button onclick="adminRemoveCat(${i})" title="Remove">×</button></span>`
       ).join('') + `<input id="admin-cats-input" style="border:none;background:none;outline:none;font-size:11px;color:var(--text);min-width:120px;padding:2px 4px" placeholder="Add tag…" onkeydown="adminCatKeydown(event)">`;
+    }
+  }
+}
+
+function adminRemoveAlias(idx){
+  const draft = getDraft(adminEditing);
+  if(!draft) return;
+  draft.aliases = (draft.aliases||[]).filter((_,i) => i !== idx);
+  markDirty(adminEditing);
+  const row = document.getElementById('admin-aliases-row');
+  if(row){
+    row.innerHTML = (draft.aliases||[]).map((a,i) =>
+      `<span class="admin-tag">${escHtml(a)}<button onclick="adminRemoveAlias(${i})" title="Remove">×</button></span>`
+    ).join('') + `<input id="admin-aliases-input" style="border:none;background:none;outline:none;font-size:11px;color:var(--text);min-width:120px;padding:2px 4px" placeholder="e.g. Controlled Unclassified Information…" onkeydown="adminAliasKeydown(event)">`;
+  }
+}
+
+function adminAliasKeydown(e){
+  if(e.key === 'Enter' || e.key === ','){
+    e.preventDefault();
+    const val = e.target.value.trim().replace(/,$/, '');
+    if(!val) return;
+    const draft = getDraft(adminEditing);
+    if(!draft) return;
+    if(!(draft.aliases||[]).includes(val)){
+      draft.aliases = [...(draft.aliases||[]), val];
+      markDirty(adminEditing);
+    }
+    e.target.value = '';
+    const row = document.getElementById('admin-aliases-row');
+    if(row){
+      row.innerHTML = (draft.aliases||[]).map((a,i) =>
+        `<span class="admin-tag">${escHtml(a)}<button onclick="adminRemoveAlias(${i})" title="Remove">×</button></span>`
+      ).join('') + `<input id="admin-aliases-input" style="border:none;background:none;outline:none;font-size:11px;color:var(--text);min-width:120px;padding:2px 4px" placeholder="e.g. Controlled Unclassified Information…" onkeydown="adminAliasKeydown(event)">`;
     }
   }
 }

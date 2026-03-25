@@ -546,7 +546,7 @@ function createQuillEditor(containerId, initialHTML, onChangeFn) {
     csBtn.innerHTML = '<span style="font-size:10px;font-family:monospace;font-weight:700;color:#16a34a">[[&nearr;]]</span>';
     csBtn.addEventListener('mousedown', function(e) {
       e.preventDefault();
-      var val = window.prompt('Content section title:');
+      var val = window.prompt('Content section title (or "Target|Display Text" for custom label):');
       if (!val || !val.trim()) return;
       var range = quill.getSelection(true);
       quill.insertText(range ? range.index : quill.getLength(), '[[>' + val.trim() + ']]');
@@ -586,16 +586,24 @@ function activateLinks(html, fromDrawer) {
   return html.replace(/\[\[([^\]]+)\]\]/g, function(m, ph) {
     ph = decodeHtmlEntities(ph);
     if (ph.startsWith('>')) {
-      var title = ph.slice(1).trim();
+      // Support [[>Target|Display Text]] syntax
+      var raw = ph.slice(1).trim();
+      var pipeIdx = raw.indexOf('|');
+      var target  = pipeIdx !== -1 ? raw.slice(0, pipeIdx).trim() : raw;
+      var display = pipeIdx !== -1 ? raw.slice(pipeIdx + 1).trim() : raw;
+      var targetLc = target.toLowerCase().trim();
       var cs = loadCustomSections().find(function(s) {
-        return s.title.toLowerCase().trim() === title.toLowerCase().trim();
+        if (s.title.toLowerCase().trim() === targetLc) return true;
+        var src = (_sources || []).find(function(src) { return src.name === s.title; });
+        if (src && src.abbrev && src.abbrev.toLowerCase().trim() === targetLc) return true;
+        return false;
       });
       if (cs) {
         var v = visited.has('content:' + cs.id);
         var reset = fromDrawer ? 'true' : 'false';
-        return '<span class="rn-content-link' + (v ? ' visited' : '') + '" onclick="navToContent(\'' + cs.id.replace(/'/g, "\\'") + '\',\'' + cs.title.replace(/'/g, "\\'") + '\',' + reset + ')" title="Open: ' + escHtml(cs.title) + '">' + escHtml(title) + ' \u2197</span>';
+        return '<span class="rn-content-link' + (v ? ' visited' : '') + '" onclick="navToContent(\'' + cs.id.replace(/'/g, "\\'") + '\',\'' + cs.title.replace(/'/g, "\\'") + '\',' + reset + ')" title="Open: ' + escHtml(cs.title) + '">' + escHtml(display) + ' \u2197</span>';
       }
-      return '<span class="rn-unlinked" title="Content section not found">' + escHtml(title) + ' \u2197</span>';
+      return '<span class="rn-unlinked" title="Content section not found: ' + escHtml(target) + '">' + escHtml(display) + ' \u2197</span>';
     }
     var f = findTerm(ph);
     if (f) {

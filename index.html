@@ -721,26 +721,42 @@ function renderTermDetail(id){
   const d=DB.find(x=>x.id===id);
   const panel=document.getElementById('defContent');
   if(!d){panel.innerHTML='<div class="def-empty"><p>Term not found</p></div>';return;}
-  const sc=srcClass(d.source);
   // Authoritative badge or note
   const isAuth = d.authoritative !== false; // default true if not set
   const authBadge = isAuth
     ? `<span class="auth-badge"><svg width="10" height="10" viewBox="0 0 16 16" fill="none"><path d="M8 1l2.163 4.38 4.837.703-3.5 3.412.826 4.816L8 11.875l-4.326 2.436.826-4.816L1 6.083l4.837-.703z" fill="#166534"/></svg>Authoritative Definition</span>`
     : `<div class="non-auth-note">Primary definition per this document — see authoritative source in <em>Also defined in</em> below</div>`;
+  // ── Helper: build a coloured source badge with governance/URL link ──
+  function makeSrcBadge(sourceName) {
+    const meta   = (_sources||[]).find(function(s){ return s.name === sourceName; });
+    const label  = (meta && meta.abbrev) ? meta.abbrev : sourceName;
+    const color  = (meta && meta.color)  ? meta.color  : null;
+    const govSec = loadCustomSections().find(function(s){ return s.title === sourceName; });
+    const url    = meta && meta.url ? meta.url : null;
+    const colorStyle = color ? 'background:'+color+'18;color:'+color+';border-color:'+color+'55;' : '';
+    const baseStyle  = 'font-size:10px;'+colorStyle;
+    if (govSec) {
+      return '<span class="src-badge" style="'+baseStyle+'cursor:pointer" onclick="navToContent(&quot;'+govSec.id.replace(/'/g,"\\'")+'&quot;,&quot;'+govSec.title.replace(/'/g,"\\'")+'&quot;,false)" title="'+escHtml(sourceName)+'">'+escHtml(label)+' \u2197</span>';
+    }
+    if (url) {
+      return '<a class="src-badge" href="'+escHtml(url)+'" target="_blank" rel="noopener" style="'+baseStyle+'text-decoration:none;cursor:pointer" title="'+escHtml(sourceName)+'">'+escHtml(label)+' ↗</a>';
+    }
+    return '<span class="src-badge" style="'+baseStyle+'" title="'+escHtml(sourceName)+'">'+escHtml(label)+'</span>';
+  }
+
   // Build alsoIn section
   let alsoHtml='';
   if(d.alsoIn&&d.alsoIn.length){
     const altLinks=d.alsoIn.map((alt,i)=>{
-      const altSc=srcClass(alt.source);
       const altIsAuth = alt.authoritative === true;
       const altBadge = altIsAuth
         ? `<span class="auth-badge" style="margin-left:auto"><svg width="9" height="9" viewBox="0 0 16 16" fill="none"><path d="M8 1l2.163 4.38 4.837.703-3.5 3.412.826 4.816L8 11.875l-4.326 2.436.826-4.816L1 6.083l4.837-.703z" fill="#166534"/></svg>Authoritative</span>`
         : '';
       const safeId=id.replace(/[^a-z0-9]/gi,'-');
       return`<div class="also-alt" id="also-alt-${safeId}-${i}">
-        <div class="also-alt-hd" onclick="toggleAlsoAlt('${id.replace(/'/g,"\\'")}',${i})">
-          <span class="src-badge ${altSc} alt-src-nav" data-altsrc="${escHtml(alt.source)}" style="font-size:10px;cursor:pointer" title="View governance">${escHtml(alt.source)} ↗</span>
-          <span class="also-sec">${alt.section}</span>
+        <div class="also-alt-hd" onclick="toggleAlsoAlt('${id.replace(/'/g,"\'")}',${i})">
+          ${makeSrcBadge(alt.source)}
+          <span class="also-sec">${escHtml(alt.section||'')}</span>
           ${altBadge}
           <span class="also-chev">▶</span>
         </div>
@@ -755,13 +771,7 @@ function renderTermDetail(id){
   const aliasHtml = (d.aliases && d.aliases.length)
     ? `<div style="font-size:11px;font-family:var(--mono);color:var(--text3);margin-top:4px">Also known as: ${d.aliases.map(a=>`<span style="background:var(--surface2);border:1px solid var(--border);border-radius:var(--r);padding:1px 7px;margin-right:4px;display:inline-block">${escHtml(a)}</span>`).join('')}</div>`
     : '';
-  // Look up abbrev from _sources, fall back to full name
-  const srcMeta   = (_sources||[]).find(function(s){ return s.name === d.source; });
-  const srcLabel  = (srcMeta && srcMeta.abbrev) ? srcMeta.abbrev : d.source;
-  const srcGovSec = loadCustomSections().find(function(s){ return s.title === d.source; });
-  const srcBadge = srcGovSec
-    ? `<span class="src-badge ${sc}" style="cursor:pointer" onclick="navToContent('${srcGovSec.id.replace(/'/g,"\'")}','${srcGovSec.title.replace(/'/g,"\'")}',false)" title="${escHtml(d.source)}">${escHtml(srcLabel)} ↗</span>`
-    : `<span class="src-badge ${sc}" title="${escHtml(d.source)}">${escHtml(srcLabel)}</span>`;
+  const srcBadge = makeSrcBadge(d.source);
   panel.innerHTML=`<div class="term-detail"><div class="tdh"><div><div class="tdterm">${d.term}</div>${aliasHtml}</div><div style="display:flex;flex-direction:column;align-items:flex-end;gap:4px">${srcBadge}<div class="tdsec">${escHtml(d.section||'')}</div></div></div><div style="margin:6px 0 10px">${authBadge}</div><div class="tddef">${renderDefText(d.rawDef)}${alsoHtml}</div>`;
 }
 

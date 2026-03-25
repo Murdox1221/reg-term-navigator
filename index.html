@@ -221,8 +221,8 @@ body{font-family:var(--sans);background:var(--bg);color:var(--text);min-height:1
 .content-nav-sub{padding-left:32px;font-size:11px}
 </style>
   <!-- Quill rich text editor -->
-  <link href="https://cdnjs.cloudflare.com/ajax/libs/quill/2.0.3/quill.snow.min.css" rel="stylesheet">
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/quill/2.0.3/quill.min.js"></script>
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/quill/1.3.7/quill.snow.min.css" rel="stylesheet">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/quill/1.3.7/quill.min.js"></script>
   <style>
     /* Quill theme overrides to match reg//nav dark theme */
     .ql-toolbar.ql-snow{background:var(--surface2);border-color:var(--border2)!important;border-radius:var(--r) var(--r) 0 0;padding:6px 8px;flex-wrap:wrap}
@@ -493,70 +493,78 @@ function findTerm(phrase){
 const _quillInstances = {};
 
 function createQuillEditor(containerId, initialHTML, onChangeFn) {
-  // Destroy old instance if any
+  // Destroy existing instance
   if (_quillInstances[containerId]) {
-    try { _quillInstances[containerId].off('text-change'); } catch(e){}
+    try {
+      _quillInstances[containerId].off('text-change');
+      // Remove old Quill DOM so container is clean
+      const old = document.getElementById(containerId);
+      if (old) old.innerHTML = '';
+    } catch(e){}
     delete _quillInstances[containerId];
   }
+
   const container = document.getElementById(containerId);
-  if (!container) return null;
-  // Clear any leftover Quill DOM from previous init
-  container.innerHTML = '';
+  if (!container) { console.warn('Quill: container not found:', containerId); return null; }
+  container.innerHTML = ''; // ensure clean slate
 
-  const toolbarOptions = [
-    [{ header: [1, 2, 3, false] }],
-    ['bold', 'italic', 'underline'],
-    [{ list: 'ordered' }, { list: 'bullet' }],
-    ['blockquote', 'code-block'],
-    ['clean']
-  ];
-
-  // Quill 2.x takes a DOM element, not a selector
-  const quill = new Quill(container, {
+  var quill = new Quill(container, {
     theme: 'snow',
-    modules: { toolbar: { container: toolbarOptions } },
-    placeholder: 'Enter content…'
+    modules: {
+      toolbar: [
+        [{ header: [1, 2, 3, false] }],
+        ['bold', 'italic', 'underline'],
+        [{ list: 'ordered' }, { list: 'bullet' }],
+        ['blockquote', 'code-block'],
+        ['clean']
+      ]
+    },
+    placeholder: 'Enter content here...'
   });
 
-  // Add [[d]] and [[↗]] buttons to the toolbar
-  const toolbar = quill.getModule('toolbar');
-  if (toolbar && toolbar.container) {
-    const extraGroup = document.createElement('span');
-    extraGroup.className = 'ql-formats';
-    const defBtn = document.createElement('button');
+  // Append custom [[d]] and [[>]] link buttons to toolbar
+  var toolbarEl = container.previousElementSibling;
+  if (toolbarEl && toolbarEl.classList.contains('ql-toolbar')) {
+    var grp = document.createElement('span');
+    grp.className = 'ql-formats';
+
+    var defBtn = document.createElement('button');
     defBtn.type = 'button';
-    defBtn.title = 'Insert definition link';
-    defBtn.innerHTML = '<span style="font-size:10px;font-family:monospace;font-weight:700;color:var(--accent)">[[d]]</span>';
-    defBtn.onmousedown = function(e) {
+    defBtn.title = 'Insert definition link [[Term]]';
+    defBtn.innerHTML = '<span style="font-size:10px;font-family:monospace;font-weight:700;color:#3b82f6">[[d]]</span>';
+    defBtn.addEventListener('mousedown', function(e) {
       e.preventDefault();
-      const val = window.prompt('Definition term name:', '');
+      var val = window.prompt('Definition term name:');
       if (!val || !val.trim()) return;
-      const range = quill.getSelection(true);
-      quill.insertText(range ? range.index : 0, '[[' + val.trim() + ']]', 'user');
-    };
-    const csBtn = document.createElement('button');
+      var range = quill.getSelection(true);
+      quill.insertText(range ? range.index : quill.getLength(), '[[' + val.trim() + ']]');
+    });
+
+    var csBtn = document.createElement('button');
     csBtn.type = 'button';
-    csBtn.title = 'Insert content section link';
-    csBtn.innerHTML = '<span style="font-size:10px;font-family:monospace;font-weight:700;color:#16a34a">[[&#8599;]]</span>';
-    csBtn.onmousedown = function(e) {
+    csBtn.title = 'Insert content section link [[>Title]]';
+    csBtn.innerHTML = '<span style="font-size:10px;font-family:monospace;font-weight:700;color:#16a34a">[[&nearr;]]</span>';
+    csBtn.addEventListener('mousedown', function(e) {
       e.preventDefault();
-      const val = window.prompt('Content section title:', '');
+      var val = window.prompt('Content section title:');
       if (!val || !val.trim()) return;
-      const range = quill.getSelection(true);
-      quill.insertText(range ? range.index : 0, '[[>' + val.trim() + ']]', 'user');
-    };
-    extraGroup.appendChild(defBtn);
-    extraGroup.appendChild(csBtn);
-    toolbar.container.appendChild(extraGroup);
+      var range = quill.getSelection(true);
+      quill.insertText(range ? range.index : quill.getLength(), '[[>' + val.trim() + ']]');
+    });
+
+    grp.appendChild(defBtn);
+    grp.appendChild(csBtn);
+    toolbarEl.appendChild(grp);
   }
 
-  if (initialHTML && initialHTML.trim()) {
-    quill.clipboard.dangerouslyPasteHTML(initialHTML);
+  // Set initial content
+  if (initialHTML && initialHTML.trim() && initialHTML.trim() !== '<p><br></p>') {
+    quill.clipboard.dangerouslyPasteHTML(0, initialHTML);
   }
 
+  // Fire change handler
   quill.on('text-change', function() {
-    const html = quill.root.innerHTML;
-    if (onChangeFn) onChangeFn(html);
+    if (onChangeFn) onChangeFn(quill.root.innerHTML);
   });
 
   _quillInstances[containerId] = quill;
@@ -568,22 +576,22 @@ function activateLinks(html, fromDrawer) {
   if (!html) return '';
   return html.replace(/\[\[([^\]]+)\]\]/g, function(m, ph) {
     if (ph.startsWith('>')) {
-      const title = ph.slice(1).trim();
-      const cs = loadCustomSections().find(function(s) {
+      var title = ph.slice(1).trim();
+      var cs = loadCustomSections().find(function(s) {
         return s.title.toLowerCase().trim() === title.toLowerCase().trim();
       });
       if (cs) {
-        const v = visited.has('content:' + cs.id);
-        const reset = fromDrawer ? 'true' : 'false';
-        return '<span class="rn-content-link' + (v?' visited':'') + '" onclick="navToContent(\'' + cs.id.replace(/'/g,"\\'") + '\',\'' + cs.title.replace(/'/g,"\\'") + '\',' + reset + ')" title="Open: ' + escHtml(cs.title) + '">' + escHtml(title) + ' \u2197</span>';
+        var v = visited.has('content:' + cs.id);
+        var reset = fromDrawer ? 'true' : 'false';
+        return '<span class="rn-content-link' + (v ? ' visited' : '') + '" onclick="navToContent(\'' + cs.id.replace(/'/g, "\\'") + '\',\'' + cs.title.replace(/'/g, "\\'") + '\',' + reset + ')" title="Open: ' + escHtml(cs.title) + '">' + escHtml(title) + ' \u2197</span>';
       }
       return '<span class="rn-unlinked" title="Content section not found">' + escHtml(title) + ' \u2197</span>';
     }
-    const f = findTerm(ph);
+    var f = findTerm(ph);
     if (f) {
-      const v = visited.has(f.id);
-      const reset = fromDrawer ? 'true' : 'false';
-      return '<span class="rn-def-link' + (v?' visited':'') + '" onclick="navTo(\'' + f.id.replace(/'/g,"\\'") + '\',' + reset + ')" title="' + escHtml(f.source) + ' \xb7 ' + escHtml(f.section||'') + '">' + ph + '</span>';
+      var v2 = visited.has(f.id);
+      var reset2 = fromDrawer ? 'true' : 'false';
+      return '<span class="rn-def-link' + (v2 ? ' visited' : '') + '" onclick="navTo(\'' + f.id.replace(/'/g, "\\'") + '\',' + reset2 + ')" title="' + escHtml(f.source) + ' \xb7 ' + escHtml(f.section || '') + '">' + ph + '</span>';
     }
     return '<span class="rn-unlinked" title="Not yet in database">' + ph + '</span>';
   });
@@ -1061,7 +1069,7 @@ function csFlushQuillEditors(secId) {
     const containerId = 'qgov-' + secId + '-' + path.join('_');
     const q = _quillInstances[containerId];
     if (q) {
-      node.body = q.getSemanticHTML ? q.getSemanticHTML() : q.root.innerHTML;
+      node.body = q.root.innerHTML;
     }
     (node.children||[]).forEach(function(child, ci) {
       flushNode(child, path.concat(ci));

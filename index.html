@@ -721,11 +721,27 @@ function renderTermDetail(id){
   const d=DB.find(x=>x.id===id);
   const panel=document.getElementById('defContent');
   if(!d){panel.innerHTML='<div class="def-empty"><p>Term not found</p></div>';return;}
-  // Authoritative badge or note
-  const isAuth = d.authoritative !== false; // default true if not set
-  const authBadge = isAuth
+
+  // ── Find the authoritative entry (primary or one of the alsoIn) ──────────────
+  // If an alsoIn entry is marked authoritative, promote it as the display entry
+  // and demote the stored primary to the alsoIn list for display purposes
+  let displayEntry = {source: d.source, section: d.section, rawDef: d.rawDef, authoritative: d.authoritative !== false};
+  let displayAlsoIn = (d.alsoIn || []).slice();
+
+  const authAlsoIdx = (d.alsoIn||[]).findIndex(function(alt){ return alt.authoritative === true; });
+  if(authAlsoIdx !== -1 && d.authoritative === false){
+    // An alsoIn entry is the authoritative one — promote it
+    const authAlt = d.alsoIn[authAlsoIdx];
+    displayEntry = {source: authAlt.source, section: authAlt.section, rawDef: authAlt.rawDef, authoritative: true};
+    // Original primary becomes an alsoIn entry
+    displayAlsoIn = [{source: d.source, section: d.section, rawDef: d.rawDef, authoritative: false}]
+      .concat(d.alsoIn.filter(function(_,i){ return i !== authAlsoIdx; }));
+  }
+
+  // Authoritative badge
+  const authBadge = displayEntry.authoritative
     ? `<span class="auth-badge"><svg width="10" height="10" viewBox="0 0 16 16" fill="none"><path d="M8 1l2.163 4.38 4.837.703-3.5 3.412.826 4.816L8 11.875l-4.326 2.436.826-4.816L1 6.083l4.837-.703z" fill="#166534"/></svg>Authoritative Definition</span>`
-    : `<div class="non-auth-note">Primary definition per this document — see authoritative source in <em>Also defined in</em> below</div>`;
+    : `<div class="non-auth-note">See authoritative source in <em>Also defined in</em> below</div>`;
   // ── Helper: build a coloured source badge with governance/URL link ──
   function makeSrcBadge(sourceName) {
     const meta   = (_sources||[]).find(function(s){ return s.name === sourceName; });
@@ -746,8 +762,8 @@ function renderTermDetail(id){
 
   // Build alsoIn section
   let alsoHtml='';
-  if(d.alsoIn&&d.alsoIn.length){
-    const altLinks=d.alsoIn.map((alt,i)=>{
+  if(displayAlsoIn&&displayAlsoIn.length){
+    const altLinks=displayAlsoIn.map((alt,i)=>{
       const altIsAuth = alt.authoritative === true;
       const altBadge = altIsAuth
         ? `<span class="auth-badge" style="margin-left:auto"><svg width="9" height="9" viewBox="0 0 16 16" fill="none"><path d="M8 1l2.163 4.38 4.837.703-3.5 3.412.826 4.816L8 11.875l-4.326 2.436.826-4.816L1 6.083l4.837-.703z" fill="#166534"/></svg>Authoritative</span>`
@@ -771,8 +787,8 @@ function renderTermDetail(id){
   const aliasHtml = (d.aliases && d.aliases.length)
     ? `<div style="font-size:11px;font-family:var(--mono);color:var(--text3);margin-top:4px">Also known as: ${d.aliases.map(a=>`<span style="background:var(--surface2);border:1px solid var(--border);border-radius:var(--r);padding:1px 7px;margin-right:4px;display:inline-block">${escHtml(a)}</span>`).join('')}</div>`
     : '';
-  const srcBadge = makeSrcBadge(d.source);
-  panel.innerHTML=`<div class="term-detail"><div class="tdh"><div><div class="tdterm">${d.term}</div>${aliasHtml}</div><div style="display:flex;flex-direction:column;align-items:flex-end;gap:4px">${srcBadge}<div class="tdsec">${escHtml(d.section||'')}</div></div></div><div style="margin:6px 0 10px">${authBadge}</div><div class="tddef">${renderDefText(d.rawDef)}${alsoHtml}</div>`;
+  const srcBadge = makeSrcBadge(displayEntry.source);
+  panel.innerHTML=`<div class="term-detail"><div class="tdh"><div><div class="tdterm">${d.term}</div>${aliasHtml}</div><div style="display:flex;flex-direction:column;align-items:flex-end;gap:4px">${srcBadge}<div class="tdsec">${escHtml(displayEntry.section||'')}</div></div></div><div style="margin:6px 0 10px">${authBadge}</div><div class="tddef">${renderDefText(displayEntry.rawDef)}${alsoHtml}</div>`;
 }
 
 
@@ -1585,6 +1601,10 @@ function adminToggleAuth(){
   const draft = getDraft(adminEditing);
   if(!draft) return;
   draft.authoritative = !(draft.authoritative !== false);
+  // Only one can be authoritative — clear all alsoIn if primary is set
+  if(draft.authoritative && draft.alsoIn){
+    draft.alsoIn.forEach(function(alt){ alt.authoritative = false; });
+  }
   const isAuth = draft.authoritative;
   const toggle = document.getElementById('admin-auth-toggle');
   toggle.className = 'admin-auth-toggle' + (isAuth?' active':'');
@@ -1592,6 +1612,8 @@ function adminToggleAuth(){
     ? '⭐ This is the authoritative definition'
     : 'Not the authoritative definition for this term';
   markDirty(adminEditing);
+  // Re-render to update alsoIn toggles
+  if(isAuth) renderAdminEditor(adminEditing);
 }
 
 
@@ -1656,7 +1678,13 @@ function adminUpdateAlso(idx, field, value){
 function adminToggleAlsoAuth(idx){
   const draft = getDraft(adminEditing);
   if(!draft || !draft.alsoIn || !draft.alsoIn[idx]) return;
-  draft.alsoIn[idx].authoritative = !draft.alsoIn[idx].authoritative;
+  const newVal = !draft.alsoIn[idx].authoritative;
+  draft.alsoIn[idx].authoritative = newVal;
+  // Only one can be authoritative — clear primary and all other alsoIn
+  if(newVal){
+    draft.authoritative = false;
+    draft.alsoIn.forEach(function(alt, i){ if(i !== idx) alt.authoritative = false; });
+  }
   markDirty(adminEditing);
   renderAdminEditor(adminEditing);
 }

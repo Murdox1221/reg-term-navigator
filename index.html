@@ -220,6 +220,58 @@ body{font-family:var(--sans);background:var(--bg);color:var(--text);min-height:1
 .content-nav-item.selected{background:var(--accent-bg);border-left:3px solid var(--accent-mid);color:var(--accent)}
 .content-nav-sub{padding-left:32px;font-size:11px}
 </style>
+  <!-- Quill rich text editor -->
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/quill/2.0.3/quill.snow.min.css" rel="stylesheet">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/quill/2.0.3/quill.min.js"></script>
+  <style>
+    /* Quill theme overrides to match reg//nav dark theme */
+    .ql-toolbar.ql-snow{background:var(--surface2);border-color:var(--border2)!important;border-radius:var(--r) var(--r) 0 0;padding:6px 8px;flex-wrap:wrap}
+    .ql-container.ql-snow{background:var(--surface);border-color:var(--border2)!important;border-radius:0 0 var(--r) var(--r);font-family:var(--sans);font-size:13px;color:var(--text);min-height:80px}
+    .ql-editor{min-height:80px;line-height:1.6;padding:10px 12px}
+    .ql-editor p{margin:0 0 8px}
+    .ql-editor h1{font-size:18px;font-weight:700;margin:12px 0 6px;color:var(--text)}
+    .ql-editor h2{font-size:15px;font-weight:600;margin:10px 0 5px;color:var(--text)}
+    .ql-editor h3{font-size:13px;font-weight:600;margin:8px 0 4px;color:var(--text)}
+    .ql-editor ul,  .ql-editor ol{padding-left:20px;margin:6px 0}
+    .ql-editor li{margin:2px 0}
+    .ql-editor blockquote{border-left:3px solid var(--accent-mid);padding-left:12px;color:var(--text2);margin:8px 0;font-style:italic}
+    .ql-editor pre{background:var(--surface2);border:1px solid var(--border);border-radius:var(--r);padding:8px 12px;font-family:var(--mono);font-size:12px;overflow-x:auto;white-space:pre}
+    .ql-editor table{border-collapse:collapse;width:100%;margin:8px 0}
+    .ql-editor td, .ql-editor th{border:1px solid var(--border2);padding:6px 10px;font-size:12px}
+    .ql-editor th{background:var(--surface2);font-weight:600}
+    .ql-snow .ql-stroke{stroke:var(--text2)}
+    .ql-snow .ql-fill{fill:var(--text2)}
+    .ql-snow .ql-picker{color:var(--text2)}
+    .ql-snow .ql-picker-options{background:var(--surface);border-color:var(--border2);box-shadow:0 4px 16px rgba(0,0,0,.2)}
+    .ql-snow .ql-picker-item{color:var(--text)}
+    .ql-toolbar.ql-snow .ql-formats button:hover .ql-stroke,
+    .ql-toolbar.ql-snow .ql-formats button.ql-active .ql-stroke{stroke:var(--accent)}
+    .ql-snow.ql-toolbar button.ql-active,
+    .ql-snow .ql-toolbar button.ql-active{color:var(--accent)}
+    /* Link chip inside editor */
+    .ql-editor .rn-link{background:var(--accent-bg);color:var(--accent);border:1px solid var(--accent-mid);border-radius:3px;padding:0 5px;cursor:default;font-size:12px;font-family:var(--mono)}
+    .ql-editor .rn-link-content{background:#1a3a1a;color:#4ade80;border:1px solid #166534;border-radius:3px;padding:0 5px;cursor:default;font-size:12px;font-family:var(--mono)}
+    /* Display rendering */
+    .rn-def-link{color:var(--accent);cursor:pointer;border-bottom:1.5px solid var(--accent-mid);transition:background .1s;border-radius:2px;padding:0 1px}
+    .rn-def-link:hover{background:var(--accent-bg)}
+    .rn-def-link.visited{color:var(--visited);border-bottom-color:#b09cd0}
+    .rn-content-link{color:#16a34a;cursor:pointer;border-bottom:1.5px dotted #16a34a;font-weight:500;border-radius:2px;padding:0 1px}
+    .rn-content-link:hover{background:#f0fdf4}
+    .rn-content-link.visited{color:#15803d}
+    .rn-unlinked{border-bottom:1.5px dashed var(--border2);color:var(--text2);cursor:help}
+    /* Rich text display in panels */
+    .rich-display h1{font-size:16px;font-weight:700;margin:12px 0 6px;color:var(--text)}
+    .rich-display h2{font-size:14px;font-weight:600;margin:10px 0 5px;color:var(--text)}
+    .rich-display h3{font-size:13px;font-weight:600;margin:8px 0 4px;color:var(--text)}
+    .rich-display p{margin:0 0 7px;line-height:1.6}
+    .rich-display ul, .rich-display ol{padding-left:20px;margin:6px 0}
+    .rich-display li{margin:2px 0;line-height:1.5}
+    .rich-display blockquote{border-left:3px solid var(--accent-mid);padding-left:12px;color:var(--text2);margin:8px 0;font-style:italic}
+    .rich-display pre{background:var(--surface2);border:1px solid var(--border);border-radius:var(--r);padding:8px 12px;font-family:var(--mono);font-size:11px;overflow-x:auto;white-space:pre}
+    .rich-display table{border-collapse:collapse;width:100%;margin:8px 0;font-size:12px}
+    .rich-display td, .rich-display th{border:1px solid var(--border2);padding:6px 10px}
+    .rich-display th{background:var(--surface2);font-weight:600}
+  </style>
 </head>
 <body>
 
@@ -437,36 +489,112 @@ function findTerm(phrase){
     return false;
   });
 }
-function renderDefText(raw){
-  return raw.replace(/\[\[([^\]]+)\]\]/g,(m,ph)=>{
-    // [[>Title]] = explicit content link
-    if(ph.startsWith('>')){
-      const title=ph.slice(1).trim();
-      const cs=loadCustomSections().find(function(s){return s.title.toLowerCase().trim()===title.toLowerCase().trim();});
-      if(cs){const v=visited.has('content:'+cs.id);return`<span class="content-link${v?' visited':''}" onclick="navToContent('${cs.id.replace(/'/g,"\\'")}','${cs.title.replace(/'/g,"\\'")}',false)" title="Open: ${escHtml(cs.title)}">${escHtml(title)} ↗</span>`;}
-      return`<span class="def-unlinked" title="Content section not found: ${escHtml(title)}">${escHtml(title)} ↗</span>`;
+// ── Quill editor registry ─────────────────────────────────────────────────────
+const _quillInstances = {};
+
+function createQuillEditor(containerId, initialHTML, onChangeFn) {
+  if (_quillInstances[containerId]) {
+    try { _quillInstances[containerId].off('text-change'); } catch(e){}
+    delete _quillInstances[containerId];
+  }
+  const container = document.getElementById(containerId);
+  if (!container) return null;
+
+  const toolbarOptions = [
+    [{ header: [1, 2, 3, false] }],
+    ['bold', 'italic', 'underline'],
+    [{ list: 'ordered' }, { list: 'bullet' }],
+    ['blockquote', 'code-block'],
+    ['clean']
+  ];
+
+  const quill = new Quill('#' + containerId, {
+    theme: 'snow',
+    modules: { toolbar: { container: toolbarOptions } },
+    placeholder: 'Enter content… use the toolbar above for formatting.'
+  });
+
+  // Add custom [[link]] buttons
+  setTimeout(function() {
+    const editorEl = document.getElementById(containerId);
+    if (!editorEl) return;
+    const toolbar = editorEl.previousElementSibling;
+    if (!toolbar || !toolbar.classList.contains('ql-toolbar')) return;
+    const extraGroup = document.createElement('span');
+    extraGroup.className = 'ql-formats';
+    const defBtn = document.createElement('button');
+    defBtn.title = 'Insert definition link [[Term]]';
+    defBtn.innerHTML = '<span style="font-size:10px;font-family:monospace;font-weight:700;color:var(--accent)">[[d]]</span>';
+    defBtn.onmousedown = function(e) {
+      e.preventDefault();
+      const val = window.prompt('Definition term name:', '');
+      if (!val || !val.trim()) return;
+      const range = quill.getSelection(true);
+      quill.insertText(range ? range.index : 0, '[[' + val.trim() + ']]', 'user');
+    };
+    const csBtn = document.createElement('button');
+    csBtn.title = 'Insert content section link [[>Title]]';
+    csBtn.innerHTML = '<span style="font-size:10px;font-family:monospace;font-weight:700;color:#16a34a">[[&#8599;]]</span>';
+    csBtn.onmousedown = function(e) {
+      e.preventDefault();
+      const val = window.prompt('Content section title:', '');
+      if (!val || !val.trim()) return;
+      const range = quill.getSelection(true);
+      quill.insertText(range ? range.index : 0, '[[>' + val.trim() + ']]', 'user');
+    };
+    extraGroup.appendChild(defBtn);
+    extraGroup.appendChild(csBtn);
+    toolbar.appendChild(extraGroup);
+  }, 80);
+
+  if (initialHTML && initialHTML.trim()) {
+    quill.clipboard.dangerouslyPasteHTML(initialHTML);
+  }
+
+  quill.on('text-change', function() {
+    const html = quill.getSemanticHTML ? quill.getSemanticHTML() : quill.root.innerHTML;
+    if (onChangeFn) onChangeFn(html);
+  });
+
+  _quillInstances[containerId] = quill;
+  return quill;
+}
+
+// ── Rich text display: activate [[links]] inside stored HTML ──────────────────
+function activateLinks(html, fromDrawer) {
+  if (!html) return '';
+  return html.replace(/\[\[([^\]]+)\]\]/g, function(m, ph) {
+    if (ph.startsWith('>')) {
+      const title = ph.slice(1).trim();
+      const cs = loadCustomSections().find(function(s) {
+        return s.title.toLowerCase().trim() === title.toLowerCase().trim();
+      });
+      if (cs) {
+        const v = visited.has('content:' + cs.id);
+        const reset = fromDrawer ? 'true' : 'false';
+        return '<span class="rn-content-link' + (v?' visited':'') + '" onclick="navToContent(\'' + cs.id.replace(/'/g,"\\'") + '\',\'' + cs.title.replace(/'/g,"\\'") + '\',' + reset + ')" title="Open: ' + escHtml(cs.title) + '">' + escHtml(title) + ' \u2197</span>';
+      }
+      return '<span class="rn-unlinked" title="Content section not found">' + escHtml(title) + ' \u2197</span>';
     }
-    // Regular definition link
-    const f=findTerm(ph);
-    if(f){const v=visited.has(f.id);return`<span class="def-link${v?' visited':''}" onclick="navTo('${f.id.replace(/'/g,"\\'")}',false)" title="${escHtml(f.source)} · ${escHtml(f.section||'')}">${ph}</span>`;}
-    return`<span class="def-unlinked" title="Not yet in database">${ph}</span>`;
+    const f = findTerm(ph);
+    if (f) {
+      const v = visited.has(f.id);
+      const reset = fromDrawer ? 'true' : 'false';
+      return '<span class="rn-def-link' + (v?' visited':'') + '" onclick="navTo(\'' + f.id.replace(/'/g,"\\'") + '\',' + reset + ')" title="' + escHtml(f.source) + ' \xb7 ' + escHtml(f.section||'') + '">' + ph + '</span>';
+    }
+    return '<span class="rn-unlinked" title="Not yet in database">' + ph + '</span>';
   });
 }
-function renderDrawerText(raw){
-  return raw.replace(/\[\[([^\]]+)\]\]/g,(m,ph)=>{
-    // [[>Title]] = explicit content link
-    if(ph.startsWith('>')){
-      const title=ph.slice(1).trim();
-      const cs=loadCustomSections().find(function(s){return s.title.toLowerCase().trim()===title.toLowerCase().trim();});
-      if(cs){const v=visited.has('content:'+cs.id);return`<span class="content-link${v?' visited':''}" onclick="navToContent('${cs.id.replace(/'/g,"\\'")}','${cs.title.replace(/'/g,"\\'")}',true)" title="Open: ${escHtml(cs.title)}">${escHtml(title)} ↗</span>`;}
-      return`<span class="dwr-unlinked" title="Content section not found: ${escHtml(title)}">${escHtml(title)} ↗</span>`;
-    }
-    // Regular definition link
-    const f=findTerm(ph);
-    if(f){const v=visited.has(f.id);return`<span class="dwr-def-link${v?' visited':''}" onclick="navTo('${f.id.replace(/'/g,"\\'")}',true)" title="${escHtml(f.source)} · ${escHtml(f.section||'')}">${ph}</span>`;}
-    return`<span class="dwr-unlinked" title="Not yet in database">${ph}</span>`;
-  });
+
+function renderDefText(raw) {
+  if (!raw) return '';
+  return '<div class="rich-display">' + activateLinks(raw, false) + '</div>';
 }
+function renderDrawerText(raw) {
+  if (!raw) return '';
+  return '<div class="rich-display">' + activateLinks(raw, true) + '</div>';
+}
+
 function navTo(id,reset){
   if(reset)trail=[id];
   else{const i=trail.indexOf(id);if(i>-1)trail=trail.slice(0,i+1);else trail.push(id);}
@@ -990,8 +1118,9 @@ function csRenderNode(secId, node, path, depth){
     + '</div>'
     + '</div>'
     + '<div style="padding:8px 10px;'+(depth===0?'background:var(--surface)':'')+'">'
-    + '<div class="admin-field" style="margin:0"><label>Body — use [[brackets]] for links</label>'
-    + '<textarea class="cs-input" data-sec="'+escHtml(secId)+'" data-path="'+pathStr+'" data-field="body" rows="2" style="min-height:52px">'+escHtml(node.body||'')+'</textarea></div>'
+    + '<div class="admin-field" style="margin:0"><label>Body — use [[d]] for definition links and [[&#8599;]] for content links</label>'
+    + '<div id="qgov-'+secId+'-'+pathStr.replace(/,/g,'_')+'" style="background:var(--surface)"></div>'
+    + '</div>'
     + '</div>'
     + (childrenHtml ? '<div style="padding:8px 10px 2px;background:var(--bg)">'+childrenHtml+'</div>' : '')
     + '</div>';
@@ -1070,6 +1199,38 @@ function renderCustomSectionEditor(editor, secId){
     + '<button class="btn cs-discard-gov" data-sec="'+escHtml(sid)+'">↺ Discard Changes</button>'
     + '</div>'
     + '</div>';
+
+  // Init Quill for every body field in this section
+  setTimeout(function() { csInitQuillEditors(secId); }, 0);
+}
+
+function csInitQuillEditors(secId) {
+  const draft = csGetDraft(secId);
+  function initNode(node, path) {
+    const containerId = 'qgov-' + secId + '-' + path.join('_');
+    const el = document.getElementById(containerId);
+    if (!el || el.classList.contains('ql-container')) return;
+    const pathArr = path;
+    createQuillEditor(containerId, node.body || '', function(html) {
+      csGetNodeByPath(secId, pathArr).body = html;
+      markContentDirty('custom_' + secId);
+    });
+    (node.children||[]).forEach(function(child, ci) {
+      initNode(child, path.concat(ci));
+    });
+  }
+  (draft.sections||[]).forEach(function(sec, si) {
+    initNode(sec, [si]);
+  });
+}
+
+function csGetNodeByPath(secId, path) {
+  const draft = csGetDraft(secId);
+  let node = {children: draft.sections};
+  for (let i = 0; i < path.length; i++) {
+    node = node.children[path[i]];
+  }
+  return node;
 }
 
 function csDiscardSection(secId){
@@ -1221,7 +1382,7 @@ function renderAdminEditor(id){
       </div>
       <div class="admin-field">
         <label>Definition</label>
-        <textarea rows="4" onchange="adminUpdateAlso(${i},'rawDef',this.value)">${escHtml(alt.rawDef||'')}</textarea>
+        <div id="af-also-rawDef-${i}" style="background:var(--surface)"></div>
       </div>
       <div class="admin-auth-toggle${altIsAuth?' active':''}" onclick="adminToggleAlsoAuth(${i})" style="margin-top:6px">
         <div class="toggle-dot"></div>
@@ -1262,11 +1423,9 @@ function renderAdminEditor(id){
       </div>
 
       <div class="admin-field">
-        <label>Definition * — use [[double brackets]] for cross-links</label>
-        <textarea id="af-rawDef" rows="6" oninput="adminFieldChange('rawDef',this.value)">${escHtml(draft.rawDef||'')}</textarea>
-        <div style="font-size:10px;font-family:var(--mono);color:var(--text3);margin-top:4px">
-          Tip: [[Term]] creates a clickable link · [[Term|display text]] creates a link with custom label
-        </div>
+        <label>Definition * — use [[d]] for definition links and [[↗]] for content links</label>
+        <div id="af-rawDef-editor" style="background:var(--surface)"></div>
+
       </div>
 
       <!-- Aliases -->
@@ -1302,6 +1461,25 @@ function renderAdminEditor(id){
     </div>`;
   // Populate source dropdown now that DOM is ready
   populateSourceDropdown(draft.source);
+  // Init Quill for rawDef field
+  setTimeout(function() {
+    if (document.getElementById('af-rawDef-editor')) {
+      createQuillEditor('af-rawDef-editor', draft.rawDef || '', function(html) {
+        const d = getDraft(adminEditing);
+        if (d) { d.rawDef = html; markDirty(adminEditing); }
+      });
+    }
+    // Init Quill for each alsoIn rawDef
+    (draft.alsoIn || []).forEach(function(alt, idx) {
+      const eid = 'af-also-rawDef-' + idx;
+      if (document.getElementById(eid)) {
+        createQuillEditor(eid, alt.rawDef || '', function(html) {
+          const d = getDraft(adminEditing);
+          if (d && d.alsoIn && d.alsoIn[idx]) { d.alsoIn[idx].rawDef = html; markDirty(adminEditing); }
+        });
+      }
+    });
+  }, 0);
 }
 
 function adminFieldChange(field, value){
@@ -2280,7 +2458,7 @@ function renderCustomGuide(sectionId){
         + '<span class="dchev">▶</span>'
         + '</div>'
         + '<div class="plist">'
-        + (node.body ? '<div class="pi" style="cursor:default;flex-direction:column;align-items:stretch;padding-left:20px"><div class="pdesc" style="white-space:pre-wrap">'+renderDrawerText(node.body)+'</div></div>' : '')
+        + (node.body ? '<div class="pi" style="cursor:default;flex-direction:column;align-items:stretch;padding-left:20px"><div class="pdesc" style="">'+renderDrawerText(node.body)+'</div></div>' : '')
         + childrenHtml
         + '</div>'
         + '</div>';
@@ -2292,7 +2470,7 @@ function renderCustomGuide(sectionId){
         + (node.id ? '<span class="pid" style="min-width:auto;flex-shrink:0">'+escHtml(node.id)+'</span>' : '')
         + '<div class="pbody" style="flex:1">'
         + '<div class="ptitle">'+escHtml(node.title||'')+'</div>'
-        + (node.body ? '<div class="pdesc" style="margin-top:4px;white-space:pre-wrap">'+renderDrawerText(node.body)+'</div>' : '')
+        + (node.body ? '<div class="pdesc" style="margin-top:4px;">'+renderDrawerText(node.body)+'</div>' : '')
         + '</div>'
         + '</div>'
         + (childrenHtml ? '<div style="margin-top:6px">'+childrenHtml+'</div>' : '')

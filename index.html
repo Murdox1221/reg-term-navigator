@@ -640,7 +640,7 @@ function activateLinks(html, fromDrawer) {
       });
       if (cs) {
         var v = visited.has('content:' + cs.id);
-        var reset = fromDrawer ? 'true' : 'false';
+        var reset = 'false';
         return '<span class="rn-content-link' + (v ? ' visited' : '') + '" onclick="navToContent(\'' + cs.id.replace(/'/g, "\\'") + '\',\'' + cs.title.replace(/'/g, "\\'") + '\',' + reset + ')" title="Open: ' + escHtml(cs.title) + '">' + escHtml(display) + ' \u2197</span>';
       }
       return '<span class="rn-unlinked" title="Content section not found: ' + escHtml(target) + '">' + escHtml(display) + ' \u2197</span>';
@@ -652,7 +652,7 @@ function activateLinks(html, fromDrawer) {
     var f = findTerm(defTarget);
     if (f) {
       var v2 = visited.has(f.id);
-      var reset2 = fromDrawer ? 'true' : 'false';
+      var reset2 = 'false';
       return '<span class="rn-def-link' + (v2 ? ' visited' : '') + '" onclick="navTo(\'' + f.id.replace(/'/g, "\\'") + '\',' + reset2 + ')" title="' + escHtml(f.source) + ' \xb7 ' + escHtml(f.section || '') + '">' + escHtml(defDisplay) + '</span>';
     }
     return '<span class="rn-unlinked" title="Not yet in database: ' + escHtml(defTarget) + '">' + escHtml(defDisplay) + '</span>';

@@ -1072,6 +1072,21 @@ function markDirty(id){
   document.getElementById('adminSaveStatus').textContent = `${adminDirty.size} unsaved change${adminDirty.size!==1?'s':''}`;
 }
 
+// Populate the source dropdown in the definitions editor from _sources
+function populateSourceDropdown(currentSource){
+  const sel = document.getElementById('af-source');
+  if(!sel) return;
+  const srcs = loadGovDocs();
+  if(!srcs.length){
+    sel.innerHTML = '<option value="">— no sources defined, go to Source tab —</option>';
+    return;
+  }
+  sel.innerHTML = '<option value="">— select a source —</option>'
+    + srcs.sort((a,b) => a.name.localeCompare(b.name))
+          .map(s => `<option value="${escHtml(s.name)}"${currentSource===s.name?' selected':''}>${escHtml(s.name)}</option>`)
+          .join('');
+}
+
 function renderAdminEditor(id){
   const draft = getDraft(id);
   if(!draft){ document.getElementById('adminEditor').innerHTML = '<div style="padding:20px;color:var(--text3)">Term not found</div>'; return; }
@@ -1133,19 +1148,10 @@ function renderAdminEditor(id){
           <input id="af-term" value="${escHtml(draft.term||'')}" oninput="adminFieldChange('term',this.value)">
         </div>
         <div class="admin-field">
-          <label>ID (unique key) *</label>
-          <input id="af-id" value="${escHtml(draft.id||'')}" oninput="adminFieldChange('id',this.value)">
-        </div>
-        <div class="admin-field">
           <label>Source document *</label>
-          ${(()=>{
-            const srcs = _sources && _sources.length ? _sources : [];
-            if(!srcs.length) return '<div style="font-size:11px;color:#f59e0b;font-family:var(--mono);padding:6px 10px;background:#fef3c7;border-radius:var(--r);border:1px solid #fcd34d">No sources defined yet — go to the <strong>Source</strong> tab to add one first.</div>';
-            return '<select id="af-source" onchange="adminFieldChange(&quot;source&quot;,this.value)" style="width:100%;padding:8px 10px;border:1px solid var(--border2);border-radius:var(--r);font-size:12px;font-family:var(--sans);background:var(--surface2);color:var(--text);outline:none">'
-              + '<option value="">— select a source —</option>'
-              + srcs.map(s => `<option value="${escHtml(s.name)}"${draft.source===s.name?' selected':''}>${escHtml(s.name)}</option>`).join('')
-              + '</select>';
-          })()}
+          <select id="af-source" onchange="adminFieldChange('source',this.value)" style="width:100%;padding:8px 10px;border:1px solid var(--border2);border-radius:var(--r);font-size:12px;font-family:var(--sans);background:var(--surface2);color:var(--text);outline:none">
+            <option value="">— select a source —</option>
+          </select>
         </div>
         <div class="admin-field">
           <label>Section / Citation</label>
@@ -1192,6 +1198,8 @@ function renderAdminEditor(id){
         <button class="btn" onclick="adminDiscardTerm('${id.replace(/'/g,"\\'")}')">↺ Discard changes</button>
       </div>
     </div>`;
+  // Populate source dropdown now that DOM is ready
+  populateSourceDropdown(draft.source);
 }
 
 function adminFieldChange(field, value){
@@ -1289,14 +1297,20 @@ function adminSaveTerm(id){
   if(!draft.term || !draft.source || !draft.rawDef){
     toast('Term, source, and definition are required'); return;
   }
+  // For new terms, set id from term name
+  if(draft._new && draft.term){
+    draft.id = draft.term;
+  }
   // Apply draft to DB
   const idx = DB.findIndex(d => d.id === id);
   if(idx > -1){
     DB[idx] = {...draft};
   } else {
-    DB.push({...draft});
+    // New term — add with correct id
+    const newDraft = {...draft};
+    delete newDraft._new;
+    DB.push(newDraft);
   }
-  // If id changed, we need to clean up
   delete draft._new;
   adminDirty.delete(id);
   saveDB();
@@ -1609,6 +1623,8 @@ function govSaveSource(id){
   saveGovDocs(govDocs);
   populateAdminSourceFilter();
   renderGovSourceList();
+  // Refresh source dropdown in definitions editor if open
+  if(adminEditing) populateSourceDropdown(getDraft(adminEditing)?.source);
   document.getElementById('adminSaveStatus').textContent =
     (adminDirty.size + govDirty.size) > 0 ? `${adminDirty.size+govDirty.size} unsaved changes` : '✓ All saved';
   toast(`"${draft.name}" saved`);

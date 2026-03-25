@@ -1051,12 +1051,31 @@ function csUpdateNode(secId, pathStr, field, value){
   markContentDirty('custom_'+secId);
 }
 
+// Flush all live Quill editors for a section into the draft before re-render
+function csFlushQuillEditors(secId) {
+  const draft = csGetDraft(secId);
+  function flushNode(node, path) {
+    const containerId = 'qgov-' + secId + '-' + path.join('_');
+    const q = _quillInstances[containerId];
+    if (q) {
+      node.body = q.getSemanticHTML ? q.getSemanticHTML() : q.root.innerHTML;
+    }
+    (node.children||[]).forEach(function(child, ci) {
+      flushNode(child, path.concat(ci));
+    });
+  }
+  (draft.sections||[]).forEach(function(sec, si) {
+    flushNode(sec, [si]);
+  });
+}
+
 function csAddChild(secId, pathStr){
   const draft = csGetDraft(secId);
   const path = pathStr ? pathStr.split(',').map(Number) : [];
   const parent = csGetNode(draft, path);
   if(!parent.children) parent.children = [];
   parent.children.push({id:'', title:'New Section', body:'', color:'#1a4a8a', children:[]});
+  csFlushQuillEditors(secId);
   markContentDirty('custom_'+secId);
   renderCustomSectionEditor(document.getElementById('contentEditor'), secId);
 }
@@ -1069,6 +1088,7 @@ function csRemoveNode(secId, pathStr){
   const parent = csGetNode(draft, parentPath);
   if(!parent || !parent.children) return;
   parent.children.splice(idx, 1);
+  csFlushQuillEditors(secId);
   markContentDirty('custom_'+secId);
   renderCustomSectionEditor(document.getElementById('contentEditor'), secId);
 }
@@ -1083,6 +1103,7 @@ function csMoveNode(secId, pathStr, dir){
   const newIdx = idx + dir;
   if(newIdx < 0 || newIdx >= siblings.length) return;
   const tmp = siblings[idx]; siblings[idx] = siblings[newIdx]; siblings[newIdx] = tmp;
+  csFlushQuillEditors(secId);
   markContentDirty('custom_'+secId);
   renderCustomSectionEditor(document.getElementById('contentEditor'), secId);
 }
@@ -1201,7 +1222,7 @@ function renderCustomSectionEditor(editor, secId){
     + '</div>';
 
   // Init Quill for every body field in this section
-  setTimeout(function() { csInitQuillEditors(secId); }, 0);
+  setTimeout(function() { csInitQuillEditors(secId); }, 50);
 }
 
 function csInitQuillEditors(secId) {
@@ -1209,8 +1230,10 @@ function csInitQuillEditors(secId) {
   function initNode(node, path) {
     const containerId = 'qgov-' + secId + '-' + path.join('_');
     const el = document.getElementById(containerId);
-    if (!el || el.classList.contains('ql-container')) return;
-    const pathArr = path;
+    if (!el) return;
+    // Skip if already initialized (Quill adds .ql-editor inside the container)
+    if (el.querySelector('.ql-editor')) return;
+    const pathArr = path.slice(); // capture by value
     createQuillEditor(containerId, node.body || '', function(html) {
       csGetNodeByPath(secId, pathArr).body = html;
       markContentDirty('custom_' + secId);
@@ -1240,6 +1263,7 @@ function csDiscardSection(secId){
 }
 
 function csSave(secId){
+  csFlushQuillEditors(secId);
   const draft = contentCustomDraft[secId];
   if(!draft) return;
   const customs = loadCustomSections();

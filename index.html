@@ -492,8 +492,16 @@ function clearTrail(){
 function renderTrail(){
   const bar=document.getElementById('trailBar');
   const btn=document.getElementById('clearTrailBtn');
+  // Use a dedicated span for trail content so the button is never overwritten
+  let trailContent = document.getElementById('trailContent');
+  if(!trailContent){
+    trailContent = document.createElement('span');
+    trailContent.id = 'trailContent';
+    trailContent.style.cssText = 'display:flex;align-items:center;gap:5px;flex:1;overflow:hidden';
+    bar.insertBefore(trailContent, btn || null);
+  }
   if(!trail.length){
-    bar.innerHTML='<span class="tl">trail:</span><span class="te">click a term chip or underlined word to explore definitions</span>';
+    trailContent.innerHTML='<span class="tl">trail:</span><span class="te">click a term chip or underlined word to explore definitions</span>';
     if(btn){btn.style.opacity='.4';btn.style.pointerEvents='none';}
     return;
   }
@@ -513,7 +521,7 @@ function renderTrail(){
     if(i===trail.length-1)h+=`<span class="tn cur">${escHtml(label)}</span>`;
     else h+=`<span class="tn" onclick="jumpTrail(${i})">${escHtml(label)}</span>`;
   });
-  bar.innerHTML=h;
+  trailContent.innerHTML=h;
   if(btn){btn.style.opacity='1';btn.style.pointerEvents='auto';}
 }
 

@@ -515,7 +515,13 @@ function renderTermDetail(id){
   const aliasHtml = (d.aliases && d.aliases.length)
     ? `<div style="font-size:11px;font-family:var(--mono);color:var(--text3);margin-top:4px">Also known as: ${d.aliases.map(a=>`<span style="background:var(--surface2);border:1px solid var(--border);border-radius:var(--r);padding:1px 7px;margin-right:4px;display:inline-block">${escHtml(a)}</span>`).join('')}</div>`
     : '';
-  panel.innerHTML=`<div class="term-detail">${chain}<div class="tdh"><div><div class="tdterm">${d.term}</div>${aliasHtml}</div><div style="display:flex;flex-direction:column;align-items:flex-end;gap:4px"><span class="src-badge ${sc}">${d.source}</span><div class="tdsec">${d.section}</div></div></div><div style="margin:6px 0 10px">${authBadge}</div><div class="tddef">${renderDefText(d.rawDef)}${alsoHtml}<div class="tdstats"><div class="tds">chain: <b>${trail.length}</b></div><div class="tds">visited: <b>${visited.size}</b></div></div></div>`;
+  // Look up source URL from _sources
+  const srcDoc = (_sources||[]).find(s => s.name === d.source);
+  const srcUrl = srcDoc && srcDoc.url ? srcDoc.url : null;
+  const srcBadge = srcUrl
+    ? `<a href="${escHtml(srcUrl)}" target="_blank" rel="noopener" class="src-badge ${sc}" style="text-decoration:none;cursor:pointer" title="Open source document">${escHtml(d.source)} ↗</a>`
+    : `<span class="src-badge ${sc}">${escHtml(d.source)}</span>`;
+  panel.innerHTML=`<div class="term-detail">${chain}<div class="tdh"><div><div class="tdterm">${d.term}</div>${aliasHtml}</div><div style="display:flex;flex-direction:column;align-items:flex-end;gap:4px">${srcBadge}<div class="tdsec">${escHtml(d.section||'')}</div></div></div><div style="margin:6px 0 10px">${authBadge}</div><div class="tddef">${renderDefText(d.rawDef)}${alsoHtml}<div class="tdstats"><div class="tds">chain: <b>${trail.length}</b></div><div class="tds">visited: <b>${visited.size}</b></div></div></div>`;
 }
 
 

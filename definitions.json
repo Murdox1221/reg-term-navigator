@@ -1,0 +1,2063 @@
+[
+  {
+    "id": "NIST SP 800-171",
+    "term": "NIST SP 800-171",
+    "source": "NIST SP 800-171",
+    "section": "Rev. 3 (2024)",
+    "cats": [
+      "NIST SP 800-171"
+    ],
+    "rawDef": "Protecting CUI in Nonfederal Systems provides 110 [[Security Control]]s across 17 control families to protect [[CUI]] confidentiality. Baseline for [[CMMC Level 2]] assessments under [[32 CFR Part 170]]. References [[NIST SP 800-53]] as source catalog and [[NIST SP 800-88]] for [[Sanitization]].",
+    "authoritative": true
+  },
+  {
+    "id": "NIST SP 800-82",
+    "term": "NIST SP 800-82",
+    "source": "NIST SP 800-82",
+    "section": "Rev. 3 (2023)",
+    "cats": [
+      "NIST SP 800-82"
+    ],
+    "rawDef": "Guide to Operational Technology ([[OT]]) Security. Covers [[ICS]], [[SCADA]], [[DCS]], and [[PLC]] architectures. References [[NIST SP 800-88]] for [[Sanitization]] and [[NIST SP 800-53]] for [[Security Control]]s.",
+    "authoritative": true
+  },
+  {
+    "id": "NIST SP 800-88",
+    "term": "NIST SP 800-88",
+    "source": "NIST SP 800-88",
+    "section": "Rev. 1 (2014)",
+    "cats": [
+      "NIST SP 800-88"
+    ],
+    "rawDef": "Guidelines for Media [[Sanitization]]. Categories: Clear, Purge, and Destroy. Applies to media containing [[CUI]]. Referenced by [[NIST SP 800-171]] practice MP.L2-3.8.3 and MA.L2-3.7.3.",
+    "authoritative": true
+  },
+  {
+    "id": "CMMC Level 2",
+    "term": "CMMC Level 2",
+    "source": "32 CFR Part 170",
+    "section": "§ 170.14",
+    "cats": [
+      "32 CFR Part 170"
+    ],
+    "rawDef": "CMMC Level 2 (Advanced) requires full implementation of 110 practices in [[NIST SP 800-171]] to protect [[CUI]]. Organizations may self-attest or undergo a [[C3PAO]] [[Assessment]] depending on program criticality. [[CMMC Status]] is stored in [[SPRS]] upon completion.",
+    "authoritative": true
+  },
+  {
+    "id": "DFARS 252.204-7012",
+    "term": "DFARS 252.204-7012",
+    "source": "DFARS 252.204-7012",
+    "section": "252.204-7012",
+    "cats": [
+      "DFARS 252.204-7012"
+    ],
+    "rawDef": "Safeguarding Covered Defense Information requires adequate security on all [[covered contractor information systems]], rapid [[Incident]] reporting, and flow-down requirements per [[32 CFR Part 170]]. References [[NIST SP 800-171]] for [[Security Control]]s.",
+    "authoritative": true
+  },
+  {
+    "id": "CUI Registry",
+    "term": "CUI Registry",
+    "source": "32 CFR Part 2002",
+    "section": "32 CFR Part 2002",
+    "cats": [
+      "32 CFR Part 2002"
+    ],
+    "rawDef": "The CUI Registry maintained by NARA lists all approved [[CUI]] categories, markings, and handling requirements. Feeds into [[32 CFR Part 170]] and [[NIST SP 800-171]] obligations.",
+    "authoritative": true
+  },
+  {
+    "id": "covered contractor information systems",
+    "term": "Covered Contractor Information System",
+    "source": "32 CFR Part 170",
+    "section": "§ 170.4(b)",
+    "cats": [
+      "32 CFR Part 170"
+    ],
+    "rawDef": "An unclassified [[Information System]] owned or operated for a DoD contractor that processes, stores, or transmits [[FCI]] or [[CUI]]. Subject to [[NIST SP 800-171]] and must comply with [[DFARS 252.204-7012]]. Constitutes the primary [[Asset]] type within the [[CMMC Assessment Scope]].",
+    "authoritative": true
+  },
+  {
+    "id": "MFA",
+    "term": "MFA",
+    "source": "NIST SP 800-63B",
+    "section": "\\u00a7 4.2",
+    "cats": [
+      "NIST SP 800-63B"
+    ],
+    "rawDef": "Multi-Factor [[Authentication]] requiring two or more [[Authenticator]]s: something you know, something you have, or something you are. Required by [[NIST SP 800-171]] practice IA.L2-3.5.3 for all network access to [[covered contractor information systems]] handling [[CUI]]. See [[Multi-factor Authentication]].",
+    "authoritative": true,
+    "alsoIn": [
+      {
+        "source": "NIST SP 800-53r4",
+        "section": "Appendix B",
+        "rawDef": "Authentication using two or more different factors to achieve authentication. Factors include: (i) something you know (e.g., password/PIN); (ii) something you have (e.g., cryptographic identification device, token); or (iii) something you are (e.g., biometric). See Authenticator."
+      }
+    ]
+  },
+  {
+    "id": "Configuration Management",
+    "term": "Configuration Management",
+    "source": "NIST SP 800-128",
+    "section": "\\u00a7 2.1",
+    "cats": [
+      "NIST SP 800-128"
+    ],
+    "rawDef": "Configuration Management maintains integrity of IT products and systems through [[Baseline Configuration]]s, [[Configuration Settings]], and change control. Under [[NIST SP 800-171]] CM domain, nine practices govern configuration of [[covered contractor information systems]] handling [[CUI]].",
+    "authoritative": true,
+    "alsoIn": [
+      {
+        "source": "NIST SP 800-53r4",
+        "section": "Appendix B",
+        "rawDef": "A collection of activities focused on establishing and maintaining the integrity of information technology products and information systems, through control of processes for initializing, changing, and monitoring the configurations of those products and systems throughout the system development life cycle."
+      }
+    ]
+  },
+  {
+    "id": "Least Privilege",
+    "term": "Least Privilege",
+    "source": "NIST SP 800-171",
+    "section": "§ 3.1.5 / AC-6",
+    "cats": [
+      "NIST SP 800-171"
+    ],
+    "rawDef": "The principle that each subject is granted only the most restrictive privileges needed for authorized tasks. Supports separation of duties and reduces [[Threat]] exposure. Required by [[NIST SP 800-171]] practice AC.L2-3.1.5 on all [[covered contractor information systems]] handling [[CUI]].",
+    "authoritative": true
+  },
+  {
+    "id": "Authorization",
+    "term": "Authorization",
+    "source": "NIST SP 800-53r4",
+    "section": "CA Family",
+    "cats": [
+      "NIST SP 800-53r4"
+    ],
+    "rawDef": "The official management decision given by a senior organizational official to authorize operation of an information system and to explicitly accept the risk to organizational operations (including mission, functions, image, or reputation), organizational assets, individuals, other organizations, and the Nation based on the implementation of an agreed-upon set of security controls.",
+    "authoritative": true
+  },
+  {
+    "id": "FIPS-Validated",
+    "term": "FIPS-Validated Cryptography",
+    "source": "NIST FIPS 140-3",
+    "section": "SC.L2-3.13.11",
+    "cats": [
+      "NIST FIPS 140-3"
+    ],
+    "rawDef": "Cryptography implemented in modules tested and validated against FIPS 140-2 or 140-3. [[NIST SP 800-171]] practice SC.L2-3.13.11 requires FIPS-validated cryptography when protecting [[CUI]]. A patch causing a previously validated module to no longer be the validated version may constitute a [[Temporary Deficiency]].",
+    "authoritative": true
+  },
+  {
+    "id": "Password",
+    "term": "Password",
+    "source": "NIST SP 800-63B",
+    "section": "§ 5.1.1",
+    "cats": [
+      "NIST SP 800-63B"
+    ],
+    "rawDef": "A string of characters used to authenticate an identity. [[NIST SP 800-171]] practices IA.L2-3.5.7 through IA.L2-3.5.10 govern password complexity, reuse, temporary use, and cryptographic protection for [[CUI]] systems.",
+    "authoritative": true
+  },
+  {
+    "id": "Security Assessment",
+    "term": "Security Assessment",
+    "source": "NIST SP 800-53r4",
+    "section": "CA-2 / CA.L2-3.12.1",
+    "cats": [
+      "NIST SP 800-53r4"
+    ],
+    "rawDef": "See Security Control Assessment.",
+    "authoritative": true
+  },
+  {
+    "id": "Security Functions",
+    "term": "Security Functions",
+    "source": "NIST SP 800-53r4",
+    "section": "AC-6",
+    "cats": [
+      "NIST SP 800-53r4"
+    ],
+    "rawDef": "The hardware, software, and/or firmware of the information system responsible for enforcing the system security policy and supporting the isolation of code and data on which the protection is based.",
+    "authoritative": true
+  },
+  {
+    "id": "Physical Access",
+    "term": "Physical Access",
+    "source": "NIST SP 800-53r4",
+    "section": "PE Family",
+    "cats": [
+      "NIST SP 800-53r4"
+    ],
+    "rawDef": "An automated system that manages the passage of people or assets through an opening(s) in a secure perimeter(s) based on a set of authorization rules. [FICAM Roadmap and Implementation Guidance]",
+    "authoritative": true
+  },
+  {
+    "id": "Digital Signature",
+    "term": "Digital Signature",
+    "source": "NIST SP 800-57",
+    "section": "§ 3.1",
+    "cats": [
+      "NIST SP 800-57"
+    ],
+    "rawDef": "A cryptographic mechanism used to verify the authenticity and integrity of digital data. Used within [[covered contractor information systems]] as part of cryptographic mechanisms required by [[NIST SP 800-171]] to protect [[CUI]].",
+    "authoritative": true
+  },
+  {
+    "id": "Encryption",
+    "term": "Encryption",
+    "source": "NIST SP 800-111",
+    "section": "§ 2.1",
+    "cats": [
+      "NIST SP 800-111"
+    ],
+    "rawDef": "The process of transforming readable data into an unreadable format using a cryptographic algorithm and key. [[NIST SP 800-171]] requires encryption of [[CUI]] on mobile devices (AC.L2-3.1.19), portable storage (MP.L2-3.8.6), at rest (SC.L2-3.13.16), and during transmission (SC.L2-3.13.8) using [[FIPS-Validated]] cryptography.",
+    "authoritative": true
+  },
+  {
+    "id": "Asset Management",
+    "term": "Asset Management",
+    "source": "CMMC Assessment Guide – Level 2",
+    "section": "L2-AC",
+    "cats": [
+      "CMMC Assessment Guide – Level 2"
+    ],
+    "rawDef": "Identification, classification, and management of all [[Asset]]s within the [[CMMC Assessment Scope]], including [[CUI Assets]], [[Security Protection Assets]], [[Contractor Risk Managed Assets]], [[Specialized Assets]], [[Out-of-Scope Assets]], and [[External Service Providers]].",
+    "authoritative": true
+  },
+  {
+    "id": "Level 2 certification assessment",
+    "term": "Level 2 Certification Assessment",
+    "source": "32 CFR Part 170",
+    "section": "§ 170.4(b) / § 170.17",
+    "cats": [
+      "32 CFR Part 170"
+    ],
+    "rawDef": "The activity performed by a [[C3PAO]] to evaluate the information system of an [[OSC]] when seeking a [[CMMC Status]] of Level 2 (C3PAO). The assessment is conducted in accordance with NIST SP 800-171A and the [[CMMC Assessment Scope]] requirements of § 170.19(c). Results in either [[Conditional Level 2 (C3PAO)]] or [[Final Level 2 (C3PAO)]] CMMC Status. (CMMC-custom term)",
+    "authoritative": true
+  },
+  {
+    "id": "CCA",
+    "term": "CCA",
+    "source": "32 CFR Part 170",
+    "section": "§ 170.4(b) / § 170.11",
+    "cats": [
+      "32 CFR Part 170"
+    ],
+    "rawDef": "A CMMC Certified Assessor (CCA) is a certified individual who, in support of a [[C3PAO]], conducts [[Level 2 certification assessment]]s of [[OSC]]s in accordance with NIST SP 800-171A and § 170.17. CCAs must be certified by the [[CAICO]], complete a Tier 3 background investigation, and have at least 3 years of cybersecurity experience and 1 year of assessment or audit experience.",
+    "authoritative": true
+  },
+  {
+    "id": "DIBCAC",
+    "term": "DIBCAC",
+    "source": "32 CFR Part 170",
+    "section": "§ 170.7",
+    "cats": [
+      "32 CFR Part 170"
+    ],
+    "rawDef": "The Defense Industrial Base Cybersecurity Assessment Center (DIBCAC) is DCMA's organization that conducts Level 3 certification assessments of [[OSC]]s and [[POA&M]] closeout certification assessments under § 170.7. DIBCAC also assesses [[C3PAO]]s and the Accreditation Body as part of their authorization process, and can conduct investigative assessments of [[OSA]]s at the CMMC PMO's direction per § 170.6(e).",
+    "authoritative": true
+  },
+  {
+    "id": "External Service Providers",
+    "term": "External Service Providers",
+    "source": "32 CFR Part 170",
+    "section": "§ 170.4(b) / § 170.19(c)(2)",
+    "cats": [
+      "32 CFR Part 170"
+    ],
+    "rawDef": "External people, technology, or facilities that an organization utilizes for provision and management of IT and/or cybersecurity services. In the CMMC Program, [[CUI]] or [[SPD]] must be processed, stored, or transmitted on the ESP assets to qualify. See also [[ESP]]. Their use must be documented in the [[SSP]] and described in a customer responsibility matrix (CRM). ESPs may voluntarily undergo a CMMC certification assessment to reduce burden during an [[OSA]]'s assessment. (CMMC-custom term)",
+    "authoritative": true
+  },
+  {
+    "id": "Monitoring",
+    "term": "Monitoring",
+    "source": "32 CFR Part 170",
+    "section": "§ 170.4(b) / NIST SP 800-160",
+    "cats": [
+      "32 CFR Part 170"
+    ],
+    "rawDef": "The act of continually checking, supervising, critically observing, or determining the status in order to identify change from the performance level required or expected at an organization-defined frequency and rate. As used in CMMC, 'periodically' means monitoring must occur at intervals of no more than one year. [[Monitoring]] applies to security control effectiveness (CA.L2-3.12.3), [[audit]] logs, and [[vulnerability scanning]].",
+    "authoritative": true
+  },
+  {
+    "id": "SPRS",
+    "term": "SPRS",
+    "source": "32 CFR Part 170",
+    "section": "§ 170.14(d) / § 170.15",
+    "cats": [
+      "32 CFR Part 170"
+    ],
+    "rawDef": "The Supplier Performance Risk System (SPRS) is the DoD's system of record for contractor [[CMMC Status]] and [[NIST SP 800-171]] self-assessment scores. [[OSA]]s submit their assessment scores and [[Affirming Official]] affirmations to SPRS. Contracting Officers verify SPRS compliance before contract award. Final [[CMMC Level 2]] certification assessment results from [[C3PAO]]s are transmitted to SPRS automatically via [[eMASS]]. DoD uses SPRS data to assess contractor cybersecurity risk during source selection.",
+    "authoritative": true
+  },
+  {
+    "id": "DCS",
+    "term": "DCS",
+    "source": "32 CFR Part 170",
+    "section": "§ 170.4(b) / NIST SP 800-82r3",
+    "cats": [
+      "32 CFR Part 170"
+    ],
+    "rawDef": "Distributed Control Systems (DCS) are a type of [[ICS]] typically used in industrial process plants such as refineries, chemical plants, and power generation facilities. DCS use a network of controllers distributed throughout the plant to control local processes with a central supervisory layer. Unlike [[SCADA]] systems, DCS are typically found within a single facility. DCS are classified as [[Specialized Assets]] under the [[CMMC Assessment Scope]].",
+    "authoritative": true
+  },
+  {
+    "id": "PLC",
+    "term": "PLC",
+    "source": "32 CFR Part 170",
+    "section": "§ 170.4(b) / NIST SP 800-82r3",
+    "cats": [
+      "32 CFR Part 170"
+    ],
+    "rawDef": "Programmable Logic Controllers (PLC) are solid-state control systems with user-programmable memory for storing instructions to implement specific functions. PLCs are used in [[ICS]] environments to automate electromechanical processes and may communicate with [[SCADA]] systems or [[DCS]]. PLCs are a core component of [[OT]] environments and are classified as [[Specialized Assets]] under the [[CMMC Assessment Scope]].",
+    "authoritative": true
+  },
+  {
+    "id": "48 CFR 52.204-21",
+    "term": "48 CFR 52.204-21",
+    "source": "48 CFR Part 52",
+    "section": "52.204-21",
+    "cats": [
+      "48 CFR Part 52"
+    ],
+    "rawDef": "Basic Safeguarding of [[covered contractor information systems|Covered Contractor Information Systems]]. This FAR clause requires contractors and subcontractors to apply 15 basic safeguarding requirements to contractor information systems that process, store, or transmit [[FCI]]. It is the foundation for [[CMMC Level 2|CMMC Level 1]] requirements and is incorporated into [[32 CFR Part 170]] as the baseline for protecting FCI. The 15 requirements map directly to CMMC Level 1 security requirements.",
+    "authoritative": true
+  },
+  {
+    "id": "48 CFR 252.204-7012",
+    "term": "DFARS 252.204-7012",
+    "source": "DFARS 252.204-7012",
+    "section": "252.204-7012",
+    "cats": [
+      "DFARS 252.204-7012"
+    ],
+    "rawDef": "Safeguarding Covered Defense Information and Cyber Incident Reporting. This DFARS clause requires DoD contractors to: (1) provide adequate security on all [[covered contractor information systems]] using [[NIST SP 800-171]] controls; (2) rapidly report cyber incidents to DoD within 72 hours; (3) preserve and protect images of compromised systems; and (4) flow down requirements to subcontractors. Referenced throughout [[32 CFR Part 170]] as the contractual mechanism for enforcing [[CUI]] protection requirements.",
+    "authoritative": true
+  },
+  {
+    "id": "48 CFR 252.204-7019",
+    "term": "48 CFR 252.204-7019",
+    "source": "48 CFR Part 52",
+    "section": "252.204-7019",
+    "cats": [
+      "48 CFR Part 52"
+    ],
+    "rawDef": "Notice of NIST SP 800-171 DoD Assessment Requirements. This DFARS clause requires offerors to have a current [[NIST SP 800-171]] assessment on record in [[SPRS]] as a condition of contract award. It requires contractors to conduct assessments using the DoD Assessment Methodology (DoDAM) and submit scores to SPRS. Referenced in [[32 CFR Part 170]] § 170.7 as the authority for [[DIBCAC]] to assess [[OSA]]s.",
+    "authoritative": true
+  },
+  {
+    "id": "48 CFR 252.204-7020",
+    "term": "48 CFR 252.204-7020",
+    "source": "48 CFR Part 52",
+    "section": "252.204-7020",
+    "cats": [
+      "48 CFR Part 52"
+    ],
+    "rawDef": "NIST SP 800-171 DoD Assessment Requirements. This DFARS clause grants the DoD — specifically [[DIBCAC]] — the right to conduct assessment of contractor implementation of [[NIST SP 800-171]] requirements on [[covered contractor information systems]]. It provides the authority for [[DIBCAC]] High Assessments and investigative assessments referenced in [[32 CFR Part 170]] §§ 170.6(e), 170.7, 170.16, and 170.17.",
+    "authoritative": true
+  },
+  {
+    "id": "48 CFR 252.204-7008",
+    "term": "48 CFR 252.204-7008",
+    "source": "48 CFR Part 52",
+    "section": "252.204-7008",
+    "cats": [
+      "48 CFR Part 52"
+    ],
+    "rawDef": "Compliance with Safeguarding Covered Defense Information Controls. This DFARS clause requires offerors to represent that they will implement [[NIST SP 800-171]] security requirements not later than December 31, 2017, or to submit a request for a variance or deviation. It also provides the mechanism for the DoD CIO to issue adjudications for alternative security measures, referenced in [[32 CFR Part 170]] § 170.24 regarding assessment findings.",
+    "authoritative": true
+  },
+  {
+    "id": "48 CFR 4.1901",
+    "term": "48 CFR 4.1901",
+    "source": "48 CFR Part 52",
+    "section": "4.1901",
+    "cats": [
+      "48 CFR Part 52"
+    ],
+    "rawDef": "The FAR provision that defines [[FCI|Federal Contract Information (FCI)]] as information, not intended for public release, that is provided by or generated for the Government under a contract to develop or deliver a product or service to the Government. This is the authoritative definition of FCI referenced in [[32 CFR Part 170]] § 170.4(b). FCI is distinct from — but may overlap with — [[CUI]].",
+    "authoritative": true
+  },
+  {
+    "id": "48 CFR 45.101",
+    "term": "48 CFR 45.101",
+    "source": "48 CFR Part 52",
+    "section": "45.101",
+    "cats": [
+      "48 CFR Part 52"
+    ],
+    "rawDef": "The FAR provision defining Government-furnished property, which includes [[GFE|Government Furnished Equipment]]. Under this definition, GFE is property in the possession of, or directly acquired by, the Government and subsequently furnished to the contractor for performance of a contract. This is the authoritative source for the GFE definition used in [[32 CFR Part 170]] § 170.4(b).",
+    "authoritative": true
+  },
+  {
+    "id": "48 CFR 3.502-1",
+    "term": "48 CFR 3.502-1",
+    "source": "48 CFR Part 52",
+    "section": "3.502-1",
+    "cats": [
+      "48 CFR Part 52"
+    ],
+    "rawDef": "The FAR provision that defines 'contractor' and 'subcontractor' as used throughout federal acquisition regulations. A contractor is any individual or other legal entity that is a party to a Government contract. A subcontractor is any supplier, distributor, vendor, or firm that furnishes supplies or services to a prime contractor or another subcontractor. These are the authoritative definitions referenced in [[32 CFR Part 170]] § 170.4(b).",
+    "authoritative": true
+  },
+  {
+    "id": "FIPS PUB 200",
+    "term": "FIPS PUB 200",
+    "source": "NIST FIPS PUB 200",
+    "section": "March 2006",
+    "cats": [
+      "NIST FIPS PUB 200"
+    ],
+    "rawDef": "Minimum Security Requirements for Federal Information and Information Systems. This FIPS publication establishes minimum security requirements for federal information and information systems in 17 security-related areas. It is the source of the 'basic security requirements' in [[NIST SP 800-171]] — the high-level requirements from which the derived requirements in [[NIST SP 800-171]] elaborate. Basic requirements that are NOT MET in a [[CMMC Level 2]] assessment carry a 5-point penalty per [[32 CFR Part 170]] § 170.24.",
+    "authoritative": true
+  },
+  {
+    "id": "FIPS PUB 201-3",
+    "term": "FIPS PUB 201-3",
+    "source": "NIST FIPS PUB 201-3",
+    "section": "January 2022",
+    "cats": [
+      "NIST FIPS PUB 201-3"
+    ],
+    "rawDef": "Personal Identity Verification (PIV) of Federal Employees and Contractors. This FIPS publication establishes standards for identity verification systems used by federal employees and contractors. It is the authoritative source for the [[Access Control]] definition used in [[32 CFR Part 170]] § 170.4(b), defining access control as the process of granting or denying specific requests to obtain and use information and related services.",
+    "authoritative": true
+  },
+  {
+    "id": "NIST SP 800-115",
+    "term": "NIST SP 800-115",
+    "source": "NIST SP 800-115",
+    "section": "September 2008",
+    "cats": [
+      "NIST SP 800-115"
+    ],
+    "rawDef": "Technical Guide to Information Security Testing and Assessment. This NIST publication provides guidelines for planning, conducting, and reporting on security testing and assessment activities. It is the authoritative source for the [[POAM|Plan of Action and Milestones (POA&M)]] definition used in [[32 CFR Part 170]] § 170.4(b), defining a POA&M as a document identifying tasks to be accomplished, resources required, milestones, and scheduled completion dates.",
+    "authoritative": true
+  },
+  {
+    "id": "NIST SP 800-160",
+    "term": "NIST SP 800-160",
+    "source": "NIST SP 800-160",
+    "section": "Vol. 2, Rev. 1 (2021)",
+    "cats": [
+      "NIST SP 800-160"
+    ],
+    "rawDef": "Developing Cyber-Resilient Systems: A Systems Security Engineering Approach. This NIST publication provides guidance on engineering trustworthy secure systems. It is the authoritative source for the [[OT|Operational Technology (OT)]] and [[Asset]] definitions in [[32 CFR Part 170]] § 170.4(b). OT is defined as programmable systems or devices that interact with the physical environment. Asset is defined as an item of value to stakeholders, tangible or intangible.",
+    "authoritative": true
+  },
+  {
+    "id": "NIST SP 800-171A",
+    "term": "NIST SP 800-171A",
+    "source": "NIST SP 800-171A",
+    "section": "June 2018",
+    "cats": [
+      "NIST SP 800-171A"
+    ],
+    "rawDef": "Assessing Security Requirements for Controlled Unclassified Information. This NIST publication provides assessment procedures for each of the 110 security requirements in [[NIST SP 800-171]]. It defines the [[Assessment Objective]]s (lettered determination statements [a], [b], [c]...) that [[C3PAO]]s and [[CCA]]s use during [[Level 2 certification assessment]]s. Referenced throughout [[32 CFR Part 170]] as the procedural basis for all [[CMMC Level 2]] assessments.",
+    "authoritative": true
+  },
+  {
+    "id": "NIST SP 800-172",
+    "term": "NIST SP 800-172",
+    "source": "NIST SP 800-172",
+    "section": "February 2021",
+    "cats": [
+      "NIST SP 800-172"
+    ],
+    "rawDef": "Enhanced Security Requirements for Protecting Controlled Unclassified Information: A Supplement to NIST SP 800-171. This publication provides 35 enhanced security requirements for protecting [[CUI]] associated with critical programs and high-value assets from [[Advanced Persistent Threat|Advanced Persistent Threats]]. [[32 CFR Part 170]] selects 24 of these requirements for [[CMMC]] Level 3, with DoD-specified Organization-Defined Parameters (ODPs). Referenced in [[32 CFR Part 170]] §§ 170.14(c)(4) and 170.18.",
+    "authoritative": true
+  },
+  {
+    "id": "NIST SP 800-172A",
+    "term": "NIST SP 800-172A",
+    "source": "NIST SP 800-172A",
+    "section": "March 2022",
+    "cats": [
+      "NIST SP 800-172A"
+    ],
+    "rawDef": "Assessing Enhanced Security Requirements for Controlled Unclassified Information. This NIST publication provides assessment procedures for the enhanced security requirements in [[NIST SP 800-172]]. Used by [[DIBCAC]] when conducting Level 3 certification assessments under [[32 CFR Part 170]] § 170.18. It also defines the Internet of Things ([[IoT]]) and Organization-Defined Parameters ([[Organization-Defined|ODPs]]) used in [[32 CFR Part 170]] § 170.4(b).",
+    "authoritative": true
+  },
+  {
+    "id": "NIST SP 800-39",
+    "term": "NIST SP 800-39",
+    "source": "NIST SP 800-39",
+    "section": "March 2011",
+    "cats": [
+      "NIST SP 800-39"
+    ],
+    "rawDef": "Managing Information Security Risk: Organization, Mission, and Information System View. This NIST publication provides guidance for an integrated, organization-wide program for managing information security risk. It is the authoritative source for the [[Risk Assessment]] and [[Advanced Persistent Threat]] definitions used in [[32 CFR Part 170]] § 170.4(b), defining Risk Assessment as the process of identifying risks resulting from system operation, incorporating threat and vulnerability analyses.",
+    "authoritative": true
+  },
+  {
+    "id": "NIST SP 800-145",
+    "term": "NIST SP 800-145",
+    "source": "NIST SP 800-145",
+    "section": "September 2011",
+    "cats": [
+      "NIST SP 800-145"
+    ],
+    "rawDef": "The NIST Definition of Cloud Computing. This NIST publication provides the authoritative definition of cloud computing as a model for enabling ubiquitous, convenient, on-demand network access to a shared pool of configurable computing resources. Referenced in [[32 CFR Part 170]] § 170.4(b) as the basis for the [[Cloud Service Provider]] (CSP) definition. Cloud computing characteristics include on-demand self-service, broad network access, resource pooling, rapid elasticity, and measured service.",
+    "authoritative": true
+  },
+  {
+    "id": "ISO/IEC 17011",
+    "term": "ISO/IEC 17011",
+    "source": "ISO/IEC 17011:2017",
+    "section": "Second edition, 2017",
+    "cats": [
+      "ISO/IEC 17011:2017"
+    ],
+    "rawDef": "Conformity Assessment — Requirements for Accreditation Bodies Accrediting Conformity Assessment Bodies. This international standard specifies requirements for accreditation bodies that accredit conformity assessment organizations. The CMMC Accreditation Body must achieve and maintain full compliance with ISO/IEC 17011 under [[32 CFR Part 170]] § 170.8(b)(3). It ensures the Accreditation Body has the competence, consistency, and impartiality to accredit [[C3PAO]]s.",
+    "authoritative": true
+  },
+  {
+    "id": "ISO/IEC 17020",
+    "term": "ISO/IEC 17020",
+    "source": "ISO/IEC 17020:2012",
+    "section": "Second edition, 2012",
+    "cats": [
+      "ISO/IEC 17020:2012"
+    ],
+    "rawDef": "Conformity Assessment — Requirements for the Operation of Various Types of Bodies Performing Inspection. This international standard specifies requirements for bodies performing inspection activities. [[C3PAO]]s must achieve and maintain ISO/IEC 17020 accreditation within 27 months of authorization under [[32 CFR Part 170]] § 170.9(b)(2). Compliance ensures C3PAOs meet independence, impartiality, and competence requirements for conducting [[Level 2 certification assessment]]s.",
+    "authoritative": true
+  },
+  {
+    "id": "ISO/IEC 17024",
+    "term": "ISO/IEC 17024",
+    "source": "ISO/IEC 17024:2012",
+    "section": "Second edition, 2012",
+    "cats": [
+      "ISO/IEC 17024:2012"
+    ],
+    "rawDef": "Conformity Assessment — General Requirements for Bodies Operating Certification of Persons. This international standard specifies requirements for bodies that certify persons against specific requirements. The [[CAICO]] must achieve and maintain ISO/IEC 17024 accreditation under [[32 CFR Part 170]] § 170.10(b)(1). Compliance ensures [[CCA]], CCI, and [[CCP]] certifications meet recognized standards for impartiality, reliability, and competence of certified individuals.",
+    "authoritative": true
+  },
+  {
+    "id": "32 CFR 2002.4",
+    "term": "32 CFR Part 2002",
+    "source": "32 CFR Part 2002",
+    "section": "§ 2002.4",
+    "cats": [
+      "32 CFR Part 2002"
+    ],
+    "rawDef": "Controlled Unclassified Information (CUI) Program regulations implementing Executive Order 13556. This regulation, administered by the National Archives and Records Administration (NARA), establishes the definition of [[CUI]] at § 2002.4(h) as the authoritative source referenced in [[32 CFR Part 170]] § 170.4(b). It also establishes the [[CUI Registry]] and the framework for CUI categories, markings, and handling requirements across the federal government.",
+    "authoritative": true
+  },
+  {
+    "id": "32 CFR 117.11",
+    "term": "32 CFR 117.11",
+    "source": "32 CFR Part 117",
+    "section": "§ 117.11",
+    "cats": [
+      "32 CFR Part 117"
+    ],
+    "rawDef": "National Industrial Security Program Operating Manual (NISPOM) provisions governing Foreign Ownership, Control, or Influence ([[FOCI]]). Section 117.11 establishes the factors and procedures for the [[DCSA]] National Security Review regarding protection of [[CUI]]. Referenced in [[32 CFR Part 170]] §§ 170.8 and 170.9 as the FOCI assessment framework that the Accreditation Body and [[C3PAO]]s must undergo as part of their authorization and accreditation processes.",
+    "authoritative": true
+  },
+  {
+    "id": "FedRAMP",
+    "term": "FedRAMP",
+    "source": "32 CFR Part 170",
+    "section": "§ 170.16(c)(2) / § 170.17(c)(5)",
+    "cats": [
+      "32 CFR Part 170"
+    ],
+    "rawDef": "The Federal Risk and Authorization Management Program (FedRAMP) is a government-wide program providing a standardized approach to security assessment, authorization, and continuous monitoring for cloud products and services. Under [[32 CFR Part 170]] §§ 170.16–170.18, [[OSA]]s and [[OSC]]s that use a [[Cloud Service Provider]] to process, store, or transmit [[CUI]] must use a CSP that is FedRAMP Authorized at the FedRAMP Moderate (or higher) baseline, or meets equivalent security requirements.",
+    "authoritative": true
+  },
+  {
+    "id": "DCSA",
+    "term": "DCSA",
+    "source": "32 CFR Part 170",
+    "section": "§ 170.8(b)(4)",
+    "cats": [
+      "32 CFR Part 170"
+    ],
+    "rawDef": "The Defense Counterintelligence and Security Agency (DCSA) is the DoD organization responsible for conducting background investigations and [[FOCI]] risk assessments. Under [[32 CFR Part 170]], DCSA conducts Tier 3 background investigations for CMMC Ecosystem members (the Accreditation Body, [[C3PAO]]s, [[CCA]]s, and [[CCP]]s) and performs National Security Reviews for [[FOCI]] risk using Standard Form 328. DCSA also administers the National Industrial Security Program per [[32 CFR 117.11]].",
+    "authoritative": true
+  },
+  {
+    "id": "FOCI",
+    "term": "FOCI",
+    "source": "32 CFR Part 170",
+    "section": "§ 170.8(b)(5) / § 170.9(b)(5)",
+    "cats": [
+      "32 CFR Part 170"
+    ],
+    "rawDef": "Foreign Ownership, Control, or Influence (FOCI) refers to a condition where a U.S. entity is under the ownership, control, or influence of a foreign interest to a degree that may adversely affect the entity's performance of classified or sensitive work. Under [[32 CFR Part 170]], the Accreditation Body and all [[C3PAO]]s must undergo a FOCI risk assessment by [[DCSA]] using Standard Form 328 per [[32 CFR 117.11]]. A disqualifying FOCI determination results in loss of authorization or accreditation from the CMMC Program.",
+    "authoritative": true
+  },
+  {
+    "id": "CCP",
+    "term": "CCP",
+    "source": "32 CFR Part 170",
+    "section": "§ 170.4(b) / § 170.13",
+    "cats": [
+      "32 CFR Part 170"
+    ],
+    "rawDef": "A CMMC Certified Professional (CCP) completes rigorous training on CMMC and the assessment process to provide advice, consulting, and recommendations to [[OSA]] clients. Candidate CCPs are certified by the [[CAICO]] after successful completion of training and testing. CCPs can participate on [[Level 2 certification assessment]] teams under [[CCA]] oversight, where the CCA makes all final determinations. CCPs are eligible to become [[CCA]]s. Certification is valid for 3 years.",
+    "authoritative": true
+  },
+  {
+    "id": "Access Control",
+    "term": "Access Control (AC)",
+    "source": "32 CFR Part 170",
+    "section": "§ 170.4(b)",
+    "cats": [
+      "32 CFR Part 170"
+    ],
+    "rawDef": "The process of granting or denying specific requests to obtain and use information and related information processing services; and/or entry to specific physical facilities (e.g., Federal buildings, military establishments, or border crossing entrances), as defined in [[FIPS PUB 201-3]]. The AC domain of [[NIST SP 800-171]] contains 22 [[CMMC Level 2]] security requirements governing access to systems that process, store, or transmit [[CUI]].",
+    "authoritative": true
+  },
+  {
+    "id": "Accreditation",
+    "term": "Accreditation",
+    "source": "32 CFR Part 170",
+    "section": "§ 170.4(b)",
+    "cats": [
+      "32 CFR Part 170"
+    ],
+    "rawDef": "A status pursuant to which a [[CMMC Ecosystem]] member (person or organization), having met all criteria for the specific role they perform including required [[ISO/IEC 17020]] or [[ISO/IEC 17024]] accreditations, may act in that role as set forth in § 170.8 for the Accreditation Body and § 170.9 for [[C3PAO]]s. (CMMC-custom term)",
+    "authoritative": true
+  },
+  {
+    "id": "Accreditation Body",
+    "term": "Accreditation Body",
+    "source": "32 CFR Part 170",
+    "section": "§ 170.4(b)",
+    "cats": [
+      "32 CFR Part 170"
+    ],
+    "rawDef": "The one organization DoD contracts with to be responsible for authorizing and accrediting members of the [[CMMC Ecosystem]], as required. The Accreditation Body must be approved by DoD, achieve [[ISO/IEC 17011]] compliance, and authorize [[C3PAO]]s to conduct [[Level 2 certification assessment]]s. At any given point in time, there will be only one Accreditation Body for the DoD CMMC Program. (CMMC-custom term)",
+    "authoritative": true
+  },
+  {
+    "id": "Advanced Persistent Threat",
+    "term": "Advanced Persistent Threat (APT)",
+    "source": "32 CFR Part 170",
+    "section": "\\u00a7 170.4(b)",
+    "cats": [
+      "32 CFR Part 170"
+    ],
+    "rawDef": "An adversary that possesses sophisticated levels of expertise and significant resources that allow it to create opportunities to achieve its objectives by using multiple attack vectors (e.g., cyber, physical, and deception). These objectives typically include establishing and extending footholds within information technology infrastructure for purposes of exfiltrating information, undermining critical aspects of a mission, or positioning itself to carry out these objectives in the future. Pursues objectives repeatedly over an extended period-of-time, adapts to defenders' efforts, as defined in [[NIST SP 800-39]].",
+    "authoritative": true,
+    "alsoIn": [
+      {
+        "source": "NIST SP 800-53r4",
+        "section": "Appendix B",
+        "rawDef": "An adversary that possesses sophisticated levels of expertise and significant resources which allow it to create opportunities to achieve its objectives by using multiple attack vectors (e.g., cyber, physical, and deception). These objectives typically include establishing and extending footholds within the information technology infrastructure of the targeted organizations for purposes of exfiltrating information, undermining or impeding critical aspects of a mission, program, or organization; or positioning itself to carry out these objectives in the future. The advanced persistent threat: (i) pursues its objectives repeatedly over an extended period of time; (ii) adapts to defenders' efforts to resist it; and (iii) is determined to maintain the level of interaction needed to execute its objectives."
+      }
+    ]
+  },
+  {
+    "id": "Affirming Official",
+    "term": "Affirming Official",
+    "source": "32 CFR Part 170",
+    "section": "§ 170.4(b)",
+    "cats": [
+      "32 CFR Part 170"
+    ],
+    "rawDef": "The senior level representative from within each [[OSA]] who is responsible for ensuring the OSA's compliance with the CMMC Program requirements and has the authority to affirm the OSA's continuing compliance with the specified security requirements. [[Affirming Official]] affirmations are submitted electronically in [[SPRS]] following each [[Assessment]] and annually thereafter per § 170.22. (CMMC-custom term)",
+    "authoritative": true
+  },
+  {
+    "id": "Assessment",
+    "term": "Assessment",
+    "source": "32 CFR Part 170",
+    "section": "§ 170.4(b)",
+    "cats": [
+      "32 CFR Part 170"
+    ],
+    "rawDef": "The testing or evaluation of security controls to determine the extent to which the controls are implemented correctly, operating as intended, and producing the desired outcome with respect to meeting the security requirements for an information system or organization, as defined in §§ 170.15 through 170.18. Assessment types include: Level 1 self-assessment ([[OSA]] only), [[Level 2 certification assessment]] ([[C3PAO]]), Level 3 certification assessment ([[DIBCAC]]), and [[POA&M]] closeout assessments. (CMMC-custom term)",
+    "authoritative": true
+  },
+  {
+    "id": "Assessment Findings Report",
+    "term": "Assessment Findings Report",
+    "source": "32 CFR Part 170",
+    "section": "§ 170.4(b)",
+    "cats": [
+      "32 CFR Part 170"
+    ],
+    "rawDef": "The final written assessment results by the third-party or government assessment team. The Assessment Findings Report is submitted to the [[OSC]] and to the DoD via [[eMASS]]. It contains the result for each [[Assessment Objective]] and the final [[CMMC Status]] determination. (CMMC-custom term)",
+    "authoritative": true
+  },
+  {
+    "id": "Assessment Objective",
+    "term": "Assessment objective",
+    "source": "32 CFR Part 170",
+    "section": "§ 170.4(b)",
+    "cats": [
+      "32 CFR Part 170"
+    ],
+    "rawDef": "A set of determination statements that, taken together, expresses the desired outcome for the assessment of a security requirement. Successful implementation of the corresponding CMMC security requirement requires meeting all applicable assessment objectives defined in [[NIST SP 800-171A]] or [[NIST SP 800-172A]]. Each practice has lettered objectives (e.g., [a], [b], [c]) that must all be MET for the requirement to pass. (CMMC-custom term)",
+    "authoritative": true
+  },
+  {
+    "id": "Assessment Team",
+    "term": "Assessment Team",
+    "source": "32 CFR Part 170",
+    "section": "§ 170.4(b)",
+    "cats": [
+      "32 CFR Part 170"
+    ],
+    "rawDef": "Participants in the [[Level 2 certification assessment]] (CMMC Certified Assessors [[CCA]]s and [[CCP]]s) or the Level 3 certification assessment ([[DIBCAC]] assessors). This does not include the [[OSC]] participants preparing for or participating in the assessment. The team must include at least one Lead [[CCA]] and one other [[CCA]] per § 170.9(b)(12). (CMMC-custom term)",
+    "authoritative": true
+  },
+  {
+    "id": "Asset",
+    "term": "Asset",
+    "source": "32 CFR Part 170",
+    "section": "§ 170.4(b)",
+    "cats": [
+      "32 CFR Part 170"
+    ],
+    "rawDef": "An item of value to stakeholders. An asset may be tangible (e.g., hardware, firmware, computing platform, network device) or intangible (e.g., humans, data, information, software, capability, service, intellectual property). Within the [[CMMC Assessment Scope]], assets are classified as [[CUI Assets]], [[Security Protection Assets]], [[Contractor Risk Managed Assets]], [[Specialized Assets]], or [[Out-of-Scope Assets]], as defined in [[NIST SP 800-160]].",
+    "authoritative": true
+  },
+  {
+    "id": "Asset Categories",
+    "term": "Asset Categories",
+    "source": "32 CFR Part 170",
+    "section": "§ 170.4(b)",
+    "cats": [
+      "32 CFR Part 170"
+    ],
+    "rawDef": "A grouping of assets that process, store or transmit information of similar designation, or provide security protection to those assets. The five Level 2 asset categories (Table 3 to § 170.19(c)(1)) are: [[CUI Assets]], [[Security Protection Assets]], [[Contractor Risk Managed Assets]], [[Specialized Assets]], and [[Out-of-Scope Assets]]. (CMMC-custom term)",
+    "authoritative": true
+  },
+  {
+    "id": "Authorized (CMMC)",
+    "term": "Authorized",
+    "source": "32 CFR Part 170",
+    "section": "§ 170.4(b)",
+    "cats": [
+      "32 CFR Part 170"
+    ],
+    "rawDef": "An interim status during which a [[CMMC Ecosystem]] member (person or organization), having met all criteria for the specific role they perform other than the required [[ISO/IEC 17020]] or [[ISO/IEC 17024]] accreditations, may act in that role for a specified time as set forth in § 170.8 for the Accreditation Body and § 170.9 for [[C3PAO]]s. Distinct from [[Accreditation]]. (CMMC-custom term)",
+    "authoritative": true
+  },
+  {
+    "id": "Capability",
+    "term": "Capability",
+    "source": "32 CFR Part 170",
+    "section": "§ 170.4(b)",
+    "cats": [
+      "32 CFR Part 170"
+    ],
+    "rawDef": "A combination of mutually reinforcing controls implemented by technical means, physical means, and procedural means. Such controls are typically selected to achieve a common information security or privacy purpose, as defined in [[NIST SP 800-37]] R2. Security capabilities implemented by [[Security Protection Assets]] within the [[CMMC Assessment Scope]] are assessed during [[Level 2 certification assessment]]s.",
+    "authoritative": true
+  },
+  {
+    "id": "Cloud Service Provider",
+    "term": "Cloud Service Provider (CSP)",
+    "source": "32 CFR Part 170",
+    "section": "§ 170.4(b)",
+    "cats": [
+      "32 CFR Part 170"
+    ],
+    "rawDef": "An external company that provides cloud services based on cloud computing. Cloud computing is a model for enabling ubiquitous, convenient, on-demand network access to a shared pool of configurable computing resources, as defined in [[NIST SP 800-145]]. [[OSA]]s and [[OSC]]s using a CSP to process, store, or transmit [[CUI]] must use a CSP that is [[FedRAMP]] Authorized at the FedRAMP Moderate baseline or meets equivalent security requirements per §§ 170.16–170.18. (CMMC-custom term)",
+    "authoritative": true
+  },
+  {
+    "id": "CMMC Ecosystem",
+    "term": "CMMC Assessment and Certification Ecosystem",
+    "source": "32 CFR Part 170",
+    "section": "§ 170.4(b)",
+    "cats": [
+      "32 CFR Part 170"
+    ],
+    "rawDef": "The people and organizations described in subpart C of [[32 CFR Part 170]], including the Accreditation Body, [[C3PAO]]s, [[CAICO]], [[CCA]]s, CCIs, and [[CCP]]s. Sometimes shortened to 'CMMC Ecosystem.' These organizations collectively deliver [[Level 2 certification assessment]]s and CMMC training and certification. (CMMC-custom term)",
+    "authoritative": true
+  },
+  {
+    "id": "CMMC Assessment Scope",
+    "term": "CMMC Assessment Scope",
+    "source": "32 CFR Part 170",
+    "section": "§ 170.4(b)",
+    "cats": [
+      "32 CFR Part 170"
+    ],
+    "rawDef": "The set of all assets in the [[OSA]]'s environment that will be assessed against CMMC security requirements, as defined in § 170.4(b) of [[32 CFR Part 170]]. Must be specified prior to assessment per § 170.19 and documented in the [[SSP]]. For Level 2, the scope is defined by [[Asset Categories]] per Table 3 to § 170.19(c)(1). (CMMC-custom term)",
+    "authoritative": true
+  },
+  {
+    "id": "CAICO",
+    "term": "CMMC Assessor and Instructor Certification Organization (CAICO)",
+    "source": "32 CFR Part 170",
+    "section": "§ 170.4(b)",
+    "cats": [
+      "32 CFR Part 170"
+    ],
+    "rawDef": "The CMMC Assessor and Instructor Certification Organization (CAICO) is defined in § 170.10 of [[32 CFR Part 170]] and means the organization responsible for training, testing, authorizing, certifying, and recertifying CMMC certified assessors, certified instructors, and certified professionals. Must achieve and maintain [[ISO/IEC 17024]] accreditation. At any given time, there will be only one CAICO. (CMMC-custom term)",
+    "authoritative": true
+  },
+  {
+    "id": "eMASS",
+    "term": "CMMC Instantiation of eMASS",
+    "source": "32 CFR Part 170",
+    "section": "§ 170.4(b)",
+    "cats": [
+      "32 CFR Part 170"
+    ],
+    "rawDef": "The Enterprise Mission Assurance Support Service (eMASS) is a government-owned and operated system. The CMMC Instantiation of eMASS is a dedicated CMMC instance where [[C3PAO]]s upload [[Level 2 certification assessment]] results, which are then transmitted automatically to [[SPRS]]. [[DIBCAC]] also uploads Level 3 results to eMASS. Accessible only to authorized users. (CMMC-custom term)",
+    "authoritative": true
+  },
+  {
+    "id": "CMMC Security Requirements",
+    "term": "CMMC Security Requirements",
+    "source": "32 CFR Part 170",
+    "section": "§ 170.4(b)",
+    "cats": [
+      "32 CFR Part 170"
+    ],
+    "rawDef": "The 15 Level 1 requirements from [[48 CFR 52.204-21]](b)(1), the 110 Level 2 requirements from [[NIST SP 800-171]] R2, and the 24 Level 3 requirements selected from [[NIST SP 800-172]]. [[OSA]]s must implement all applicable requirements to achieve the corresponding [[CMMC Status]].",
+    "authoritative": true
+  },
+  {
+    "id": "CMMC Status",
+    "term": "CMMC Status",
+    "source": "32 CFR Part 170",
+    "section": "§ 170.4(b)",
+    "cats": [
+      "32 CFR Part 170"
+    ],
+    "rawDef": "The result of meeting or exceeding the minimum required score for the corresponding [[Assessment]], as stored in [[SPRS]]. Statuses include: Final Level 1 (Self), Conditional/Final Level 2 (Self), Conditional/Final Level 2 ([[C3PAO]]), and Conditional/Final Level 3 ([[DIBCAC]]). Conditional status requires a [[POA&M]] closed within 180 days. (CMMC-custom term)",
+    "authoritative": true
+  },
+  {
+    "id": "CMMC Status Date",
+    "term": "CMMC Status Date",
+    "source": "32 CFR Part 170",
+    "section": "§ 170.4(b)",
+    "cats": [
+      "32 CFR Part 170"
+    ],
+    "rawDef": "The date that the [[CMMC Status]] results are submitted to [[SPRS]] or [[eMASS]], as appropriate. The Conditional CMMC Status Date remains unchanged after a successful [[POA&M]] closeout — a new date is not set for a Final that follows a Conditional. [[Level 2 certification assessment]]s must be renewed within three years of the CMMC Status Date. (CMMC-custom term)",
+    "authoritative": true
+  },
+  {
+    "id": "C3PAO",
+    "term": "CMMC Third-Party Assessment Organization (C3PAO)",
+    "source": "32 CFR Part 170",
+    "section": "§ 170.4(b)",
+    "cats": [
+      "32 CFR Part 170"
+    ],
+    "rawDef": "A CMMC Third-Party Assessment Organization (C3PAO) is an organization authorized or accredited by the Accreditation Body to conduct [[Level 2 certification assessment]]s and issue Certificates of [[CMMC Status]] to [[OSC]]s per § 170.9. Must employ [[CCA]]s, comply with [[ISO/IEC 17020]], and submit results to [[eMASS]]/[[SPRS]]. (CMMC-custom term)",
+    "authoritative": true
+  },
+  {
+    "id": "Contractor",
+    "term": "Contractor",
+    "source": "32 CFR Part 170",
+    "section": "§ 170.4(b)",
+    "cats": [
+      "32 CFR Part 170"
+    ],
+    "rawDef": "Defined in [[48 CFR 3.502-1]]. Any individual or other legal entity that is a party to a Government contract. Subject to CMMC requirements when the contract requires processing, storing, or transmitting [[FCI]] or [[CUI]] on contractor information systems.",
+    "authoritative": true
+  },
+  {
+    "id": "Contractor Risk Managed Assets",
+    "term": "Contractor Risk Managed Assets",
+    "source": "32 CFR Part 170",
+    "section": "§ 170.4(b)",
+    "cats": [
+      "32 CFR Part 170"
+    ],
+    "rawDef": "Defined in Table 3 to § 170.19(c)(1) of [[32 CFR Part 170]]. Assets that can, but are not intended to, process, store, or transmit [[CUI]] because of security policy, procedures, and practices in place. Not required to be physically or logically separated from [[CUI Assets]]. Documented in the [[SSP]]; assessors review the SSP and may conduct limited checks. (CMMC-custom term)",
+    "authoritative": true
+  },
+  {
+    "id": "CUI",
+    "term": "Controlled Unclassified Information (CUI)",
+    "source": "32 CFR Part 170",
+    "section": "\\u00a7 170.4(b)",
+    "cats": [
+      "32 CFR Part 170"
+    ],
+    "rawDef": "Controlled Unclassified Information (CUI) is defined in [[32 CFR 2002.4]](h). Information the Government creates or possesses, or that an entity creates or possesses on behalf of the Government, that a law, regulation, or Government-wide policy requires handling using safeguarding or dissemination controls. Protection of CUI on contractor systems is governed by [[32 CFR Part 170]] and [[NIST SP 800-171]]. Managed per the [[CUI Registry]].",
+    "authoritative": false,
+    "alsoIn": [
+      {
+        "source": "32 CFR Part 170",
+        "section": "§ 170.4(b)",
+        "rawDef": "Defined in 32 CFR 2002.4(h). Under the CMMC Program, protection of CUI on contractor information systems is governed by 32 CFR Part 170 and NIST SP 800-171."
+      }
+    ]
+  },
+  {
+    "id": "CUI Assets",
+    "term": "Controlled Unclassified Information (CUI) Assets",
+    "source": "32 CFR Part 170",
+    "section": "§ 170.4(b)",
+    "cats": [
+      "32 CFR Part 170"
+    ],
+    "rawDef": "Assets that can process, store, or transmit [[CUI]]. Always within the [[CMMC Assessment Scope]] and must be assessed against all [[CMMC Level 2]] security requirements per [[NIST SP 800-171]]. Must be documented in the [[OSA]]'s asset inventory, [[SSP]], and network diagram. (CMMC-custom term)",
+    "authoritative": true
+  },
+  {
+    "id": "DCMA DIBCAC High Assessment",
+    "term": "DCMA DIBCAC High Assessment",
+    "source": "32 CFR Part 170",
+    "section": "§ 170.4(b)",
+    "cats": [
+      "32 CFR Part 170"
+    ],
+    "rawDef": "An assessment conducted by Government personnel in accordance with [[NIST SP 800-171A]] and the [[DoDAM]] that consists of: (A) a review of a contractor's Basic Assessment; (B) a thorough document review; (C) verification and demonstration of the contractor's [[SSP]]; and (D) discussions with the contractor. Results in a 'High' confidence level. Under § 170.20, a perfect-score DIBCAC High Assessment may qualify for standards acceptance. Source: [[48 CFR 252.204-7020]].",
+    "authoritative": true
+  },
+  {
+    "id": "DIB",
+    "term": "Defense Industrial Base (DIB)",
+    "source": "32 CFR Part 170",
+    "section": "§ 170.4(b)",
+    "cats": [
+      "32 CFR Part 170"
+    ],
+    "rawDef": "The Defense Industrial Base (DIB) is defined in 32 CFR 236.2 as the worldwide industrial complex that enables research, development, design, production, delivery, and maintenance of military weapons systems. The primary population of contractors subject to CMMC requirements under [[32 CFR Part 170]]. The [[DIBCAC]] — Defense Industrial Base Cybersecurity Assessment Center — specifically supports DIB cybersecurity.",
+    "authoritative": true
+  },
+  {
+    "id": "DoDAM",
+    "term": "DoD Assessment Methodology (DoDAM)",
+    "source": "32 CFR Part 170",
+    "section": "§ 170.4(b)",
+    "cats": [
+      "32 CFR Part 170"
+    ],
+    "rawDef": "The DoD Assessment Methodology (DoDAM) documents a standard methodology for strategic assessment of a contractor's implementation of [[NIST SP 800-171]] R2, required for compliance with [[48 CFR 252.204-7012]]. Defines Basic (self), Medium (DIBCAC), and High ([[DCMA DIBCAC High Assessment]]) confidence levels. Source: DoDAM Version 1.2.1.",
+    "authoritative": true
+  },
+  {
+    "id": "Enduring Exception",
+    "term": "Enduring Exception",
+    "source": "32 CFR Part 170",
+    "section": "§ 170.4(b)",
+    "cats": [
+      "32 CFR Part 170"
+    ],
+    "rawDef": "A special circumstance or system where remediation and full compliance with CMMC security requirements is not feasible. Examples include: systems replicating 'fielded' system configurations, medical devices, test equipment, [[OT]], and [[IoT]]. No [[Operational Plan of Action]] is required, but the circumstance must be documented in the [[SSP]]. [[Specialized Assets]] and [[GFE]] may be enduring exceptions. Assessed as MET per § 170.24(b)(1)(i). (CMMC-custom term)",
+    "authoritative": true
+  },
+  {
+    "id": "Enterprise",
+    "term": "Enterprise",
+    "source": "32 CFR Part 170",
+    "section": "§ 170.4(b)",
+    "cats": [
+      "32 CFR Part 170"
+    ],
+    "rawDef": "An organization with a defined mission/goal and a defined boundary, using information systems to execute that mission, with responsibility for managing its own risks and performance. May consist of acquisition, program management, financial management, human resources, security, and information systems, as defined in [[NIST SP 800-53]] R5.",
+    "authoritative": true
+  },
+  {
+    "id": "ESP",
+    "term": "External Service Provider (ESP)",
+    "source": "32 CFR Part 170",
+    "section": "§ 170.4(b)",
+    "cats": [
+      "32 CFR Part 170"
+    ],
+    "rawDef": "An External Service Provider (ESP) means external people, technology, or facilities that an organization utilizes for provision and management of IT and/or cybersecurity services. In the CMMC Program, [[CUI]] or [[SPD]] must be processed, stored, or transmitted on the ESP's assets for the provider to qualify as an ESP. ESPs that handle CUI must be within the [[CMMC Assessment Scope]]. CSP-based ESPs must meet [[FedRAMP]] Moderate requirements. See also [[External Service Providers]]. (CMMC-custom term)",
+    "authoritative": true
+  },
+  {
+    "id": "FCI",
+    "term": "Federal Contract Information (FCI)",
+    "source": "32 CFR Part 170",
+    "section": "§ 170.4(b)",
+    "cats": [
+      "32 CFR Part 170"
+    ],
+    "rawDef": "Federal Contract Information (FCI) is defined in [[48 CFR 4.1901]]. Information, not intended for public release, that is provided by or generated for the Government under a contract to develop or deliver a product or service. Contractors processing only FCI (not [[CUI]]) require [[CMMC Level 2|CMMC Level 1]] status. FCI is protected under [[48 CFR 52.204-21]] and [[32 CFR Part 170]].",
+    "authoritative": true
+  },
+  {
+    "id": "GFE",
+    "term": "Government Furnished Equipment (GFE)",
+    "source": "32 CFR Part 170",
+    "section": "§ 170.4(b)",
+    "cats": [
+      "32 CFR Part 170"
+    ],
+    "rawDef": "Government Furnished Equipment (GFE) has the same meaning as 'government-furnished property' defined in [[48 CFR 45.101]]. Equipment owned by the U.S. Government and furnished to a contractor. GFE is a type of [[Specialized Assets]] under the [[CMMC Assessment Scope]] and may be designated as an [[Enduring Exception]] when full [[NIST SP 800-171]] compliance is not feasible. Must be documented in the [[SSP]].",
+    "authoritative": true
+  },
+  {
+    "id": "ICS",
+    "term": "Industrial Control Systems (ICS)",
+    "source": "32 CFR Part 170",
+    "section": "\\u00a7 170.4(b)",
+    "cats": [
+      "32 CFR Part 170"
+    ],
+    "rawDef": "Industrial Control Systems (ICS) is a general term encompassing [[SCADA]] systems, distributed control systems ([[DCS]]), and other configurations including [[PLC]]s found in industrial sectors and critical infrastructures. An ICS consists of combinations of control components that act together to achieve an industrial objective, as defined in [[NIST SP 800-82]] r3. ICS is a type of [[OT]] and constitutes [[Specialized Assets]] under the [[CMMC Assessment Scope]].",
+    "authoritative": true,
+    "alsoIn": [
+      {
+        "source": "NIST SP 800-53r4",
+        "section": "Appendix B",
+        "rawDef": "An information system used to control industrial processes such as manufacturing, product handling, production, and distribution. Industrial control systems include supervisory control and data acquisition (SCADA) systems used to control geographically dispersed assets, as well as distributed control systems (DCSs) and smaller control systems using programmable logic controllers to control localized processes."
+      }
+    ]
+  },
+  {
+    "id": "Information System",
+    "term": "Information System (IS)",
+    "source": "32 CFR Part 170",
+    "section": "\\u00a7 170.4(b)",
+    "cats": [
+      "32 CFR Part 170"
+    ],
+    "rawDef": "Defined in [[NIST SP 800-171]] R2 as a discrete set of information resources organized for the collection, processing, maintenance, use, sharing, dissemination, or disposition of information. An IS is one type of [[Asset]]. The terms 'information system' and 'system' are used interchangeably throughout [[NIST SP 800-171]]. [[covered contractor information systems|Covered contractor information systems]] that process [[CUI]] must comply with [[32 CFR Part 170]].",
+    "authoritative": true,
+    "alsoIn": [
+      {
+        "source": "NIST SP 800-53r4",
+        "section": "Appendix B",
+        "rawDef": "A discrete set of information resources organized for the collection, processing, maintenance, use, sharing, dissemination, or disposition of information. [44 U.S.C., Sec. 3502]"
+      }
+    ]
+  },
+  {
+    "id": "IoT",
+    "term": "Internet of Things (IoT)",
+    "source": "32 CFR Part 170",
+    "section": "§ 170.4(b)",
+    "cats": [
+      "32 CFR Part 170"
+    ],
+    "rawDef": "The Internet of Things (IoT) means the network of devices that contain hardware, software, firmware, and actuators which allow the devices to connect, interact, and freely exchange data and information, as defined in [[NIST SP 800-172A]]. IoT and Industrial IoT (IIoT) devices are types of [[Specialized Assets]] under the [[CMMC Assessment Scope]] and may be designated as [[Enduring Exception]]s.",
+    "authoritative": true
+  },
+  {
+    "id": "Operational Plan of Action",
+    "term": "Operational plan of action",
+    "source": "32 CFR Part 170",
+    "section": "§ 170.4(b)",
+    "cats": [
+      "32 CFR Part 170"
+    ],
+    "rawDef": "As used in security requirement CA.L2-3.12.2, the formal artifact identifying temporary vulnerabilities and [[Temporary Deficiency|temporary deficiencies]] in implementation of requirements and documenting how they will be mitigated or eliminated. The [[OSA]] defines the format and content. Does not identify a remediation timeline and is distinct from a [[POA&M]], which must be closed within 180 days. [[Temporary Deficiency|Temporary deficiencies]] documented in an operational plan of action are assessed as MET per § 170.24(b)(1)(ii). (CMMC-custom term)",
+    "authoritative": true
+  },
+  {
+    "id": "OT",
+    "term": "Operational Technology (OT)",
+    "source": "32 CFR Part 170",
+    "section": "\\u00a7 170.4(b)",
+    "cats": [
+      "32 CFR Part 170"
+    ],
+    "rawDef": "Operational Technology (OT) means programmable systems or devices that interact with the physical environment. These systems detect or cause a direct change through the monitoring or control of devices, processes, and events. Examples include [[ICS]], building management systems, fire control systems, and physical access control mechanisms, as defined in [[NIST SP 800-160]] V2R1. OT is a type of [[Specialized Assets]] and may qualify as an [[Enduring Exception]] within the [[CMMC Assessment Scope]].",
+    "authoritative": true,
+    "alsoIn": [
+      {
+        "source": "NIST SP 800-160",
+        "section": "Vol. 2, Rev. 1",
+        "rawDef": "Programmable systems or devices that interact with the physical environment (or manage devices that interact with the physical environment). These systems or devices detect or cause a direct change through the monitoring or control of devices, processes, and events. Examples include industrial control systems, building management systems, fire control systems, and physical access control mechanisms."
+      }
+    ]
+  },
+  {
+    "id": "Organization-Defined",
+    "term": "Organization-defined",
+    "source": "32 CFR Part 170",
+    "section": "§ 170.4(b)",
+    "cats": [
+      "32 CFR Part 170"
+    ],
+    "rawDef": "As determined by the [[OSA]] being assessed except as defined in the case of an Organization-Defined Parameter (ODP). Applies to frequency or rates (e.g., how often [[Vulnerability Scanning]] occurs) and configuration choices (e.g., session lock timeouts). [[Periodically]] is a specific organization-defined term meaning no more than once per year. (CMMC-custom term)",
+    "authoritative": true
+  },
+  {
+    "id": "ODPs",
+    "term": "Organization-Defined Parameters (ODPs)",
+    "source": "32 CFR Part 170",
+    "section": "§ 170.4(b)",
+    "cats": [
+      "32 CFR Part 170"
+    ],
+    "rawDef": "Organization-Defined Parameters (ODPs) means selected enhanced security requirements contain selection and assignment operations to give organizations flexibility in defining variable parts of those requirements, as defined in [[NIST SP 800-172A]]. Note: For [[CMMC Level 2|CMMC Level 3]] requirements, the organization defining the parameters is the DoD — not the [[OSA]].",
+    "authoritative": true
+  },
+  {
+    "id": "OSA",
+    "term": "Organization Seeking Assessment (OSA)",
+    "source": "32 CFR Part 170",
+    "section": "§ 170.4(b)",
+    "cats": [
+      "32 CFR Part 170"
+    ],
+    "rawDef": "An Organization Seeking Assessment (OSA) is the entity seeking to undergo a self-assessment or certification assessment for a given information system for the purposes of achieving and maintaining any [[CMMC Status]]. The term OSA includes all [[OSC]]s. The [[Affirming Official]] within the OSA affirms compliance in [[SPRS]]. (CMMC-custom term)",
+    "authoritative": true
+  },
+  {
+    "id": "OSC",
+    "term": "Organization Seeking Certification (OSC)",
+    "source": "32 CFR Part 170",
+    "section": "§ 170.4(b)",
+    "cats": [
+      "32 CFR Part 170"
+    ],
+    "rawDef": "An Organization Seeking Certification (OSC) is the entity seeking to undergo a certification assessment for a given information system to achieve the [[CMMC Status]] of Level 2 ([[C3PAO]]) or Level 3 ([[DIBCAC]]). An OSC is also an [[OSA]]. The [[Assessment Findings Report]] is submitted to the OSC upon completion of the [[Level 2 certification assessment]]. (CMMC-custom term)",
+    "authoritative": true
+  },
+  {
+    "id": "Out-of-Scope Assets",
+    "term": "Out-of-Scope Assets",
+    "source": "32 CFR Part 170",
+    "section": "§ 170.4(b)",
+    "cats": [
+      "32 CFR Part 170"
+    ],
+    "rawDef": "Assets that cannot process, store, or transmit [[CUI]] because they are physically or logically separated from information systems that do, or are inherently unable to do so — except for assets that provide security protection for a [[CUI Assets|CUI asset]] (see [[Security Protection Assets]]). Out-of-scope assets are not within the [[CMMC Assessment Scope]] and are not assessed against CMMC security requirements. (CMMC-custom term)",
+    "authoritative": true
+  },
+  {
+    "id": "Periodically",
+    "term": "Periodically",
+    "source": "32 CFR Part 170",
+    "section": "§ 170.4(b)",
+    "cats": [
+      "32 CFR Part 170"
+    ],
+    "rawDef": "Occurring at a regular interval as determined by the [[OSA]] that may not exceed one year. As used in many [[CMMC Level 2]] requirements such as [[Risk Assessment]]s (RA.L2-3.11.1), [[Vulnerability Scanning]] (RA.L2-3.11.2), and security control monitoring (CA.L2-3.12.3), the interval is [[Organization-Defined]] with a maximum of one year. (CMMC-custom term)",
+    "authoritative": true
+  },
+  {
+    "id": "Personally Identifiable Information",
+    "term": "Personally Identifiable Information",
+    "source": "32 CFR Part 170",
+    "section": "\\u00a7 170.4(b)",
+    "cats": [
+      "32 CFR Part 170"
+    ],
+    "rawDef": "Information that can be used to distinguish or trace an individual's identity, either alone or when combined with other information that is linked or linkable to a specific individual, as defined in [[NIST SP 800-53]] R5. Within the CMMC Program, [[C3PAO]]s and the [[CAICO]] must encrypt and protect all PII in their information systems and databases.",
+    "authoritative": true,
+    "alsoIn": [
+      {
+        "source": "NIST SP 800-53r4",
+        "section": "Appendix B",
+        "rawDef": "Information which can be used to distinguish or trace the identity of an individual (e.g., name, social security number, biometric records, etc.) either alone, or when combined with other personal or identifying information which is linked or linkable to a specific individual (e.g., date and place of birth, mother's maiden name, etc.)."
+      }
+    ]
+  },
+  {
+    "id": "POAM",
+    "term": "Plan of Action and Milestones (POA&M)",
+    "source": "32 CFR Part 170",
+    "section": "\\u00a7 170.4(b)",
+    "cats": [
+      "32 CFR Part 170"
+    ],
+    "rawDef": "A Plan of Action and Milestones (POA&M) is a document that identifies tasks needing to be accomplished, details resources required, milestones, and scheduled completion dates, as defined in [[NIST SP 800-115]]. Under [[32 CFR Part 170]] § 170.21, a POA&M may only be used for select NOT MET requirements when: score ≥ 80%, requirement point value ≤ 1 (with limited exceptions), and specific critical requirements are excluded. POA&Ms must be closed within 180 days. Distinct from an [[Operational Plan of Action]].",
+    "authoritative": true,
+    "alsoIn": [
+      {
+        "source": "NIST SP 800-53r4",
+        "section": "Appendix B",
+        "rawDef": "A document that identifies tasks needing to be accomplished. It details resources required to accomplish the elements of the plan, any milestones in meeting the tasks, and scheduled completion dates for the milestones. [OMB Memorandum 02-01]"
+      }
+    ]
+  },
+  {
+    "id": "Prime Contractor",
+    "term": "Prime Contractor",
+    "source": "32 CFR Part 170",
+    "section": "§ 170.4(b)",
+    "cats": [
+      "32 CFR Part 170"
+    ],
+    "rawDef": "Defined in [[48 CFR 3.502-1]]. The contractor directly awarded a DoD contract. Prime contractors are responsible for ensuring subcontractors who process, store, or transmit [[FCI]] or [[CUI]] comply with applicable CMMC requirements per § 170.23 of [[32 CFR Part 170]].",
+    "authoritative": true
+  },
+  {
+    "id": "Process, store, or transmit",
+    "term": "Process, store, or transmit",
+    "source": "32 CFR Part 170",
+    "section": "§ 170.4(b)",
+    "cats": [
+      "32 CFR Part 170"
+    ],
+    "rawDef": "Data can be used by an [[Asset]] (e.g., accessed, entered, edited, generated, manipulated, or printed); data is inactive or at rest on an asset (e.g., on electronic media, in system component memory, or in paper format); or data is being transferred from one asset to another (e.g., data in transit using physical or digital transport methods). This definition determines which assets fall within the [[CMMC Assessment Scope]] for [[CUI]] and [[FCI]]. (CMMC-custom term)",
+    "authoritative": true
+  },
+  {
+    "id": "Restricted Information Systems",
+    "term": "Restricted Information Systems",
+    "source": "32 CFR Part 170",
+    "section": "§ 170.4(b)",
+    "cats": [
+      "32 CFR Part 170"
+    ],
+    "rawDef": "Systems (and associated IT components) that are configured based on government requirements and are used to support a contract (e.g., fielded systems, obsolete systems, and product deliverable replicas). A type of [[Specialized Assets]] under the [[CMMC Assessment Scope]] that may qualify as [[Enduring Exception]]s when full [[NIST SP 800-171]] compliance is not feasible. Must be documented in the [[SSP]]. (CMMC-custom term)",
+    "authoritative": true
+  },
+  {
+    "id": "Risk",
+    "term": "Risk",
+    "source": "32 CFR Part 170",
+    "section": "\\u00a7 170.4(b)",
+    "cats": [
+      "32 CFR Part 170"
+    ],
+    "rawDef": "A measure of the extent to which an entity is threatened by a potential circumstance or event, typically a function of: (i) the adverse impacts that would arise if the circumstance or event occurs; and (ii) the likelihood of occurrence, as defined in [[NIST SP 800-53]] R5. Risk is managed through [[Risk Assessment]]s, [[POA&M]]s, security controls, and the CMMC program framework.",
+    "authoritative": true,
+    "alsoIn": [
+      {
+        "source": "NIST SP 800-53r4",
+        "section": "Appendix B",
+        "rawDef": "A measure of the extent to which an entity is threatened by a potential circumstance or event, and typically a function of: (i) the adverse impacts that would arise if the circumstance or event occurs; and (ii) the likelihood of occurrence. Information system-related security risks are those risks that arise from the loss of confidentiality, integrity, or availability of information or information systems and reflect the potential adverse impacts to organizational operations (including mission, functions, image, or reputation), organizational assets, individuals, other organizations, and the Nation. [FIPS 200, Adapted]"
+      }
+    ]
+  },
+  {
+    "id": "Risk Assessment",
+    "term": "Risk Assessment",
+    "source": "32 CFR Part 170",
+    "section": "\\u00a7 170.4(b)",
+    "cats": [
+      "32 CFR Part 170"
+    ],
+    "rawDef": "The process of identifying risks to organizational operations, assets, individuals, and the Nation resulting from the operation of a system. Risk Assessment incorporates threat and vulnerability analyses, and considers mitigations provided by security controls planned or in place. Synonymous with risk analysis, as defined in [[NIST SP 800-39]]. Required [[Periodically]] by RA.L2-3.11.1 under [[NIST SP 800-171]].",
+    "authoritative": true,
+    "alsoIn": [
+      {
+        "source": "NIST SP 800-53r4",
+        "section": "Appendix B",
+        "rawDef": "The process of identifying risks to organizational operations (including mission, functions, image, reputation), organizational assets, individuals, other organizations, and the Nation, resulting from the operation of an information system. Part of risk management, incorporates threat and vulnerability analyses, and considers mitigations provided by security controls planned or in place. Synonymous with risk analysis."
+      }
+    ]
+  },
+  {
+    "id": "Security Protection Assets",
+    "term": "Security Protection Assets (SPA)",
+    "source": "32 CFR Part 170",
+    "section": "§ 170.4(b)",
+    "cats": [
+      "32 CFR Part 170"
+    ],
+    "rawDef": "Assets providing security functions or capabilities for the [[OSA]]'s [[CMMC Assessment Scope]], such as firewalls, authentication servers, and SIEMs. Security Protection Assets are assessed against [[CMMC Level 2]] security requirements relevant to the capabilities they provide and store [[SPD]]. (CMMC-custom term)",
+    "authoritative": true
+  },
+  {
+    "id": "SPD",
+    "term": "Security Protection Data (SPD)",
+    "source": "32 CFR Part 170",
+    "section": "§ 170.4(b)",
+    "cats": [
+      "32 CFR Part 170"
+    ],
+    "rawDef": "Security Protection Data (SPD) means data stored or processed by [[Security Protection Assets]] (SPA) that are used to protect an [[OSC]]'s assessed environment. Includes configuration data, log files, data related to the configuration or vulnerability status of in-scope assets, and passwords that grant access to the in-scope environment. SPD triggers [[ESP]] classification when processed by external providers. (CMMC-custom term)",
+    "authoritative": true
+  },
+  {
+    "id": "Specialized Assets",
+    "term": "Specialized Assets",
+    "source": "32 CFR Part 170",
+    "section": "§ 170.4(b)",
+    "cats": [
+      "32 CFR Part 170"
+    ],
+    "rawDef": "Types of assets considered specialized for CMMC purposes: [[GFE]], [[IoT]] or Industrial Internet of Things (IIoT), [[OT]], [[Restricted Information Systems]], and [[Test Equipment]]. Specialized Assets can process, store, or transmit [[CUI]] but may be unable to be fully secured. Within the [[CMMC Assessment Scope]] but may qualify as [[Enduring Exception]]s. Must be documented in the [[SSP]]. (CMMC-custom term)",
+    "authoritative": true
+  },
+  {
+    "id": "Subcontractor",
+    "term": "Subcontractor",
+    "source": "32 CFR Part 170",
+    "section": "§ 170.4(b)",
+    "cats": [
+      "32 CFR Part 170"
+    ],
+    "rawDef": "Defined in [[48 CFR 3.502-1]]. Any supplier, distributor, vendor, or firm that furnishes supplies or services to or for a prime contractor or another subcontractor. Subject to CMMC flow-down requirements per § 170.23 of [[32 CFR Part 170]] when processing, storing, or transmitting [[FCI]] or [[CUI]]. Minimum CMMC requirements depend on whether the subcontractor handles FCI only or CUI.",
+    "authoritative": true
+  },
+  {
+    "id": "SCADA",
+    "term": "Supervisory Control and Data Acquisition (SCADA)",
+    "source": "32 CFR Part 170",
+    "section": "\\u00a7 170.4(b)",
+    "cats": [
+      "32 CFR Part 170"
+    ],
+    "rawDef": "Supervisory Control and Data Acquisition (SCADA) is a generic name for a computerized system capable of gathering and processing data and applying operational controls over long distances. Typical uses include power transmission and pipeline systems. Designed for unique communication challenges posed by various media (phone lines, microwave, satellite). Usually shared rather than dedicated, as defined in [[NIST SP 800-82]] r3. SCADA is a type of [[ICS]] and constitutes [[Specialized Assets]] under the [[CMMC Assessment Scope]].",
+    "authoritative": true,
+    "alsoIn": [
+      {
+        "source": "NIST SP 800-82",
+        "section": "Rev. 3",
+        "rawDef": "A generic name for a computerized system that is capable of gathering and processing data and applying operational controls over long distances. Typical uses include power transmission and distribution and pipeline systems. SCADA was designed for the unique communication challenges (e.g., delays, data integrity) posed by the various media that must be used, such as phone lines, microwave, and satellite. Usually shared rather than dedicated."
+      }
+    ]
+  },
+  {
+    "id": "SSP",
+    "term": "System Security Plan (SSP)",
+    "source": "32 CFR Part 170",
+    "section": "\\u00a7 170.4(b)",
+    "cats": [
+      "32 CFR Part 170"
+    ],
+    "rawDef": "The System Security Plan (SSP) is the formal document providing an overview of the security requirements for an information system and describing the security controls in place or planned, as defined in [[NIST SP 800-53]] R5. The SSP describes system components, the operating environment, how security requirements are implemented, and system interconnections. An up-to-date SSP is required at time of assessment (CA.L2-3.12.4); its absence results in a NOT MET finding under [[32 CFR Part 170]] § 170.24.",
+    "authoritative": true,
+    "alsoIn": [
+      {
+        "source": "NIST SP 800-53r4",
+        "section": "Appendix B",
+        "rawDef": "Formal document that provides an overview of the security requirements for an information system and describes the security controls in place or planned for meeting those requirements. [NIST SP 800-18]"
+      }
+    ]
+  },
+  {
+    "id": "Temporary Deficiency",
+    "term": "Temporary deficiency",
+    "source": "32 CFR Part 170",
+    "section": "§ 170.4(b)",
+    "cats": [
+      "32 CFR Part 170"
+    ],
+    "rawDef": "A condition where remediation of a discovered deficiency is feasible, and a known fix is available or is in process. Must be documented in an [[Operational Plan of Action]]. Arises after initial implementation — not an 'in progress' initial implementation of a CMMC requirement. Temporary deficiencies properly addressed in an [[Operational Plan of Action]] are assessed as MET per § 170.24(b)(1)(ii). No standard maximum duration. For example, [[FIPS-Validated]] cryptography requiring a patch may be a temporary deficiency. (CMMC-custom term)",
+    "authoritative": true
+  },
+  {
+    "id": "Test Equipment",
+    "term": "Test Equipment",
+    "source": "32 CFR Part 170",
+    "section": "§ 170.4(b)",
+    "cats": [
+      "32 CFR Part 170"
+    ],
+    "rawDef": "Hardware and/or associated IT components used in the testing of products, system components, and contract deliverables. A type of [[Specialized Assets]] under the [[CMMC Assessment Scope]] that may be designated as an [[Enduring Exception]] when full [[NIST SP 800-171]] compliance is not feasible. Must be documented in the [[SSP]]. (CMMC-custom term)",
+    "authoritative": true
+  },
+  {
+    "id": "User",
+    "term": "User",
+    "source": "32 CFR Part 170",
+    "section": "\\u00a7 170.4(b)",
+    "cats": [
+      "32 CFR Part 170"
+    ],
+    "rawDef": "An individual, or (system) process acting on behalf of an individual, authorized to access a system, as defined in [[NIST SP 800-53]] R5. All user activity on systems within the [[CMMC Assessment Scope]] must be attributable to individual identities per AU.L2-3.3.2 of [[NIST SP 800-171]]. User types include privileged and non-privileged per [[Least Privilege]] requirements.",
+    "authoritative": true,
+    "alsoIn": [
+      {
+        "source": "NIST SP 800-53r4",
+        "section": "Appendix B",
+        "rawDef": "Individual, or (system) process acting on behalf of an individual, authorized to access an information system. See Organizational User and Non-Organizational User. [CNSSI 4009, Adapted]"
+      }
+    ]
+  },
+  {
+    "id": "Audit Log",
+    "term": "Audit Log",
+    "source": "NIST SP 800-53r4",
+    "section": "Appendix B",
+    "cats": [
+      "NIST SP 800-53r4"
+    ],
+    "rawDef": "A chronological record of information system activities, including records of system accesses and operations performed in a given period. [CNSSI 4009]",
+    "authoritative": true
+  },
+  {
+    "id": "Audit Record",
+    "term": "Audit Record",
+    "source": "NIST SP 800-53r4",
+    "section": "Appendix B",
+    "cats": [
+      "NIST SP 800-53r4"
+    ],
+    "rawDef": "An individual entry in an audit log related to an audited event.",
+    "authoritative": true
+  },
+  {
+    "id": "Authentication",
+    "term": "Authentication",
+    "source": "NIST SP 800-53r4",
+    "section": "Appendix B",
+    "cats": [
+      "NIST SP 800-53r4"
+    ],
+    "rawDef": "Verifying the identity of a user, process, or device, often as a prerequisite to allowing access to resources in an information system. [FIPS 200]",
+    "authoritative": true,
+    "alsoIn": [
+      {
+        "source": "32 CFR Part 170",
+        "section": "§ 170.4(b)",
+        "rawDef": "Defined in FIPS PUB 200. Within the CMMC Program, authentication is required for all users, processes, and devices accessing systems that process, store, or transmit CUI."
+      }
+    ]
+  },
+  {
+    "id": "Authenticator",
+    "term": "Authenticator",
+    "source": "NIST SP 800-53r4",
+    "section": "Appendix B",
+    "cats": [
+      "NIST SP 800-53r4"
+    ],
+    "rawDef": "The means used to confirm the identity of a user, processor, or device (e.g., user password or token).",
+    "authoritative": true
+  },
+  {
+    "id": "Availability",
+    "term": "Availability",
+    "source": "NIST SP 800-53r4",
+    "section": "Appendix B",
+    "cats": [
+      "NIST SP 800-53r4"
+    ],
+    "rawDef": "Ensuring timely and reliable access to and use of information. [44 U.S.C., Sec. 3542]",
+    "authoritative": true,
+    "alsoIn": [
+      {
+        "source": "NIST FIPS PUB 200",
+        "section": "§ 2",
+        "rawDef": "Ensuring timely and reliable access to and use of information. [44 U.S.C., Sec. 3542]"
+      }
+    ]
+  },
+  {
+    "id": "Baseline Configuration",
+    "term": "Baseline Configuration",
+    "source": "NIST SP 800-53r4",
+    "section": "Appendix B",
+    "cats": [
+      "NIST SP 800-53r4"
+    ],
+    "rawDef": "A documented set of specifications for an information system, or a configuration item within a system, that has been formally reviewed and agreed on at a given point in time, and which can be changed only through change control procedures.",
+    "authoritative": true
+  },
+  {
+    "id": "Boundary Protection",
+    "term": "Boundary Protection",
+    "source": "NIST SP 800-53r4",
+    "section": "Appendix B",
+    "cats": [
+      "NIST SP 800-53r4"
+    ],
+    "rawDef": "Monitoring and control of communications at the external boundary of an information system to prevent and detect malicious and other unauthorized communications, through the use of boundary protection devices (e.g., gateways, routers, firewalls, guards, encrypted tunnels).",
+    "authoritative": true
+  },
+  {
+    "id": "Configuration Settings",
+    "term": "Configuration Settings",
+    "source": "NIST SP 800-53r4",
+    "section": "Appendix B",
+    "cats": [
+      "NIST SP 800-53r4"
+    ],
+    "rawDef": "The set of parameters that can be changed in hardware, software, or firmware that affect the security posture and/or functionality of the information system.",
+    "authoritative": true
+  },
+  {
+    "id": "Incident",
+    "term": "Incident",
+    "source": "NIST SP 800-53r4",
+    "section": "Appendix B",
+    "cats": [
+      "NIST SP 800-53r4"
+    ],
+    "rawDef": "An occurrence that actually or potentially jeopardizes the confidentiality, integrity, or availability of an information system or the information the system processes, stores, or transmits or that constitutes a violation or imminent threat of violation of security policies, security procedures, or acceptable use policies. [FIPS 200]",
+    "authoritative": true,
+    "alsoIn": [
+      {
+        "source": "32 CFR Part 170",
+        "section": "§ 170.4(b)",
+        "rawDef": "An occurrence that actually or potentially jeopardizes the confidentiality, integrity, or availability of an information system or the information the system processes, stores, or transmits, or constitutes a violation or imminent threat of violation of security policies, security procedures, or acceptable use policies. (CMMC-custom term)"
+      }
+    ]
+  },
+  {
+    "id": "Malicious Code",
+    "term": "Malicious Code",
+    "source": "NIST SP 800-53r4",
+    "section": "Appendix B",
+    "cats": [
+      "NIST SP 800-53r4"
+    ],
+    "rawDef": "Software or firmware intended to perform an unauthorized process that will have adverse impact on the confidentiality, integrity, or availability of an information system. A virus, worm, Trojan horse, or other code-based entity that infects a host. Spyware and some forms of adware are also examples of malicious code.",
+    "authoritative": true
+  },
+  {
+    "id": "Mobile Code",
+    "term": "Mobile Code",
+    "source": "NIST SP 800-53r4",
+    "section": "Appendix B",
+    "cats": [
+      "NIST SP 800-53r4"
+    ],
+    "rawDef": "Software programs or parts of programs obtained from remote information systems, transmitted across a network, and executed on a local information system without explicit installation or execution by the recipient.",
+    "authoritative": true
+  },
+  {
+    "id": "Multi-factor Authentication",
+    "term": "Multi-factor Authentication",
+    "source": "NIST SP 800-53r4",
+    "section": "Appendix B",
+    "cats": [
+      "NIST SP 800-53r4"
+    ],
+    "rawDef": "Authentication using two or more different factors to achieve authentication. Factors include: (i) something you know (e.g., password/PIN); (ii) something you have (e.g., cryptographic identification device, token); or (iii) something you are (e.g., biometric). See [[Authenticator]].",
+    "authoritative": true
+  },
+  {
+    "id": "Network",
+    "term": "Network",
+    "source": "NIST SP 800-53r4",
+    "section": "Appendix B",
+    "cats": [
+      "NIST SP 800-53r4"
+    ],
+    "rawDef": "Information system(s) implemented with a collection of interconnected components. Such components may include routers, hubs, cabling, telecommunications controllers, key distribution centers, and technical control devices. [CNSSI 4009]",
+    "authoritative": true
+  },
+  {
+    "id": "Nonlocal Maintenance",
+    "term": "Nonlocal Maintenance",
+    "source": "NIST SP 800-53r4",
+    "section": "Appendix B",
+    "cats": [
+      "NIST SP 800-53r4"
+    ],
+    "rawDef": "Maintenance activities conducted by individuals communicating through a network, either an external network (e.g., the Internet) or an internal network.",
+    "authoritative": true
+  },
+  {
+    "id": "Privileged Account",
+    "term": "Privileged Account",
+    "source": "NIST SP 800-53r4",
+    "section": "Appendix B",
+    "cats": [
+      "NIST SP 800-53r4"
+    ],
+    "rawDef": "An information system account with authorizations of a [[Privileged User]].",
+    "authoritative": true
+  },
+  {
+    "id": "Remote Access",
+    "term": "Remote Access",
+    "source": "NIST SP 800-53r4",
+    "section": "Appendix B",
+    "cats": [
+      "NIST SP 800-53r4"
+    ],
+    "rawDef": "Access to an organizational information system by a user (or a process acting on behalf of a user) communicating through an external network (e.g., the Internet).",
+    "authoritative": true
+  },
+  {
+    "id": "Role-Based Access Control",
+    "term": "Role-Based Access Control",
+    "source": "NIST SP 800-53r4",
+    "section": "Appendix B",
+    "cats": [
+      "NIST SP 800-53r4"
+    ],
+    "rawDef": "Access control based on user roles (i.e., a collection of access authorizations a user receives based on an explicit or implicit assumption of a given role). Role permissions may be inherited through a role hierarchy and typically reflect the permissions needed to perform defined functions within an organization. A given role may apply to a single individual or to several individuals.",
+    "authoritative": true
+  },
+  {
+    "id": "Sanitization",
+    "term": "Sanitization",
+    "source": "NIST SP 800-53r4",
+    "section": "Appendix B",
+    "cats": [
+      "NIST SP 800-53r4"
+    ],
+    "rawDef": "Actions taken to render data written on media unrecoverable by both ordinary and, for some forms of sanitization, extraordinary means. Process to remove information from media such that data recovery is not possible. It includes removing all classified labels, markings, and activity logs.",
+    "authoritative": false,
+    "alsoIn": [
+      {
+        "source": "NIST SP 800-88",
+        "section": "Rev. 1",
+        "rawDef": "A general term referring to the actions taken to render data written on media unrecoverable by both ordinary and, for some forms of sanitization, extraordinary means. The three main methods are Clear, Purge, and Destroy."
+      }
+    ]
+  },
+  {
+    "id": "Security Control",
+    "term": "Security Control",
+    "source": "NIST SP 800-53r4",
+    "section": "Appendix B",
+    "cats": [
+      "NIST SP 800-53r4"
+    ],
+    "rawDef": "A safeguard or countermeasure prescribed for an information system or an organization designed to protect the confidentiality, integrity, and availability of its information and to meet a set of defined security requirements.",
+    "authoritative": true
+  },
+  {
+    "id": "Software",
+    "term": "Software",
+    "source": "NIST SP 800-53r4",
+    "section": "Appendix B",
+    "cats": [
+      "NIST SP 800-53r4"
+    ],
+    "rawDef": "Computer programs and associated data that may be dynamically written or modified during execution. [CNSSI 4009]",
+    "authoritative": true
+  },
+  {
+    "id": "Threat",
+    "term": "Threat",
+    "source": "NIST SP 800-53r4",
+    "section": "Appendix B",
+    "cats": [
+      "NIST SP 800-53r4"
+    ],
+    "rawDef": "Any circumstance or event with the potential to adversely impact organizational operations (including mission, functions, image, or reputation), organizational assets, individuals, other organizations, or the Nation through an information system via unauthorized access, destruction, disclosure, modification of information, and/or denial of service. [CNSSI 4009, Adapted]",
+    "authoritative": true
+  },
+  {
+    "id": "Vulnerability",
+    "term": "Vulnerability",
+    "source": "NIST SP 800-53r4",
+    "section": "Appendix B",
+    "cats": [
+      "NIST SP 800-53r4"
+    ],
+    "rawDef": "Weakness in an information system, system security procedures, internal controls, or implementation that could be exploited or triggered by a threat source. [CNSSI 4009]",
+    "authoritative": true
+  },
+  {
+    "id": "VPN",
+    "term": "VPN",
+    "source": "NIST SP 800-53r4",
+    "section": "Appendix B",
+    "cats": [
+      "NIST SP 800-53r4"
+    ],
+    "rawDef": "Protected information system link utilizing tunneling, security controls, and endpoint address translation giving the impression of a dedicated line. [CNSSI 4009]",
+    "authoritative": true
+  },
+  {
+    "id": "Vulnerability Scanning",
+    "term": "Vulnerability Scanning",
+    "source": "NIST SP 800-53r4",
+    "section": "Appendix B",
+    "cats": [
+      "NIST SP 800-53r4"
+    ],
+    "rawDef": "Systematic examination of an information system or product to determine the adequacy of security measures, identify security deficiencies, provide data from which to predict the effectiveness of proposed security measures, and confirm the adequacy of such measures after implementation. [CNSSI 4009]",
+    "authoritative": true
+  },
+  {
+    "id": "Adequate Security",
+    "term": "Adequate Security",
+    "source": "NIST SP 800-53r4",
+    "section": "Appendix B",
+    "cats": [
+      "NIST SP 800-53r4"
+    ],
+    "rawDef": "Security commensurate with the risk resulting from the loss, misuse, or unauthorized access to or modification of information. [OMB Circular A-130, Appendix III, Adapted]",
+    "authoritative": true
+  },
+  {
+    "id": "Authenticity",
+    "term": "Authenticity",
+    "source": "NIST SP 800-53r4",
+    "section": "Appendix B",
+    "cats": [
+      "NIST SP 800-53r4"
+    ],
+    "rawDef": "The property of being genuine and being able to be verified and trusted; confidence in the validity of a transmission, a message, or message originator. See [[Authentication]].",
+    "authoritative": true
+  },
+  {
+    "id": "Authorization Boundary",
+    "term": "Authorization Boundary",
+    "source": "NIST SP 800-53r4",
+    "section": "Appendix B",
+    "cats": [
+      "NIST SP 800-53r4"
+    ],
+    "rawDef": "All components of an information system to be authorized for operation by an authorizing official and excludes separately authorized systems, to which the information system is connected.",
+    "authoritative": true
+  },
+  {
+    "id": "Availability",
+    "term": "Availability",
+    "source": "NIST SP 800-53r4",
+    "section": "Appendix B",
+    "cats": [
+      "NIST SP 800-53r4"
+    ],
+    "rawDef": "Ensuring timely and reliable access to and use of information. [44 U.S.C., Sec. 3542]",
+    "authoritative": true,
+    "alsoIn": [
+      {
+        "source": "NIST FIPS PUB 200",
+        "section": "§ 2",
+        "rawDef": "Ensuring timely and reliable access to and use of information. [44 U.S.C., Sec. 3542]"
+      }
+    ]
+  },
+  {
+    "id": "Blacklisting",
+    "term": "Blacklisting",
+    "source": "NIST SP 800-53r4",
+    "section": "Appendix B",
+    "cats": [
+      "NIST SP 800-53r4"
+    ],
+    "rawDef": "The process used to identify: (i) software programs that are not authorized to execute on an information system; or (ii) prohibited Universal Resource Locators (URL)/websites.",
+    "authoritative": true
+  },
+  {
+    "id": "Common Control",
+    "term": "Common Control",
+    "source": "NIST SP 800-53r4",
+    "section": "Appendix B",
+    "cats": [
+      "NIST SP 800-53r4"
+    ],
+    "rawDef": "A security control that is inheritable by one or more organizational information systems. See [[Security Control]]. [NIST SP 800-37; CNSSI]",
+    "authoritative": true
+  },
+  {
+    "id": "Confidentiality",
+    "term": "Confidentiality",
+    "source": "NIST SP 800-53r4",
+    "section": "Appendix B",
+    "cats": [
+      "NIST SP 800-53r4"
+    ],
+    "rawDef": "Preserving authorized restrictions on information access and disclosure, including means for protecting personal privacy and proprietary information. [44 U.S.C., Sec. 3542]",
+    "authoritative": true,
+    "alsoIn": [
+      {
+        "source": "NIST FIPS PUB 200",
+        "section": "§ 2",
+        "rawDef": "Preserving authorized restrictions on information access and disclosure, including means for protecting personal privacy and proprietary information. [44 U.S.C., Sec. 3542]"
+      }
+    ]
+  },
+  {
+    "id": "Configuration Control",
+    "term": "Configuration Control",
+    "source": "NIST SP 800-53r4",
+    "section": "Appendix B",
+    "cats": [
+      "NIST SP 800-53r4"
+    ],
+    "rawDef": "Process for controlling modifications to hardware, firmware, software, and documentation to protect the information system against improper modifications before, during, and after system implementation. [CNSSI 4009]",
+    "authoritative": true
+  },
+  {
+    "id": "Covert Channel Analysis",
+    "term": "Covert Channel Analysis",
+    "source": "NIST SP 800-53r4",
+    "section": "Appendix B",
+    "cats": [
+      "NIST SP 800-53r4"
+    ],
+    "rawDef": "Determination of the extent to which the security policy model and subsequent lower-level program descriptions may allow unauthorized access to information. [CNSSI 4009]",
+    "authoritative": true
+  },
+  {
+    "id": "Cryptography",
+    "term": "Cryptography",
+    "source": "NIST SP 800-53r4",
+    "section": "Appendix B",
+    "cats": [
+      "NIST SP 800-53r4"
+    ],
+    "rawDef": "A cryptographic module validated by the Cryptographic Module Validation Program (CMVP) to meet requirements specified in FIPS Publication 140-2 (as amended). As a prerequisite to CMVP validation, the cryptographic module is required to employ a cryptographic algorithm implementation that has successfully passed validation testing by the Cryptographic Algorithm Validation Program (CAVP). See NSA-Approved Cryptography.",
+    "authoritative": true
+  },
+  {
+    "id": "Defense-in-Depth",
+    "term": "Defense-in-Depth",
+    "source": "NIST SP 800-53r4",
+    "section": "Appendix B",
+    "cats": [
+      "NIST SP 800-53r4"
+    ],
+    "rawDef": "Information security strategy integrating people, technology, and operations capabilities to establish variable barriers across multiple layers and missions of the organization.",
+    "authoritative": true
+  },
+  {
+    "id": "Event",
+    "term": "Event",
+    "source": "NIST SP 800-53r4",
+    "section": "Appendix B",
+    "cats": [
+      "NIST SP 800-53r4"
+    ],
+    "rawDef": "Any observable occurrence in an information system. [CNSSI 4009, Adapted]",
+    "authoritative": true
+  },
+  {
+    "id": "Exfiltration",
+    "term": "Exfiltration",
+    "source": "NIST SP 800-53r4",
+    "section": "Appendix B",
+    "cats": [
+      "NIST SP 800-53r4"
+    ],
+    "rawDef": "The unauthorized transfer of information from an information system.",
+    "authoritative": true
+  },
+  {
+    "id": "Firmware",
+    "term": "Firmware",
+    "source": "NIST SP 800-53r4",
+    "section": "Appendix B",
+    "cats": [
+      "NIST SP 800-53r4"
+    ],
+    "rawDef": "Computer programs and data stored in hardware — typically in read-only memory (ROM) or programmable read-only memory (PROM) — such that the programs and data cannot be dynamically written or modified during execution of the programs. [CNSSI 4009]",
+    "authoritative": true
+  },
+  {
+    "id": "Hardware",
+    "term": "Hardware",
+    "source": "NIST SP 800-53r4",
+    "section": "Appendix B",
+    "cats": [
+      "NIST SP 800-53r4"
+    ],
+    "rawDef": "The physical components of an information system. See [[Software]] and [[Firmware]]. [CNSSI 4009]",
+    "authoritative": true
+  },
+  {
+    "id": "Information Security Risk",
+    "term": "Information Security Risk",
+    "source": "NIST SP 800-53r4",
+    "section": "Appendix B",
+    "cats": [
+      "NIST SP 800-53r4"
+    ],
+    "rawDef": "The risk to organizational operations (including mission, functions, image, reputation), organizational assets, individuals, other organizations, and the Nation due to the potential for unauthorized access, use, disclosure, disruption, modification, or destruction of information and/or information systems.",
+    "authoritative": true
+  },
+  {
+    "id": "Integrity",
+    "term": "Integrity",
+    "source": "NIST SP 800-53r4",
+    "section": "Appendix B",
+    "cats": [
+      "NIST SP 800-53r4"
+    ],
+    "rawDef": "Guarding against improper information modification or destruction, and includes ensuring information non-repudiation and authenticity. [44 U.S.C., Sec. 3542]",
+    "authoritative": true,
+    "alsoIn": [
+      {
+        "source": "NIST FIPS PUB 200",
+        "section": "§ 2",
+        "rawDef": "Guarding against improper information modification or destruction, and includes ensuring information non-repudiation and authenticity. [44 U.S.C., Sec. 3542]"
+      }
+    ]
+  },
+  {
+    "id": "Local Access",
+    "term": "Local Access",
+    "source": "NIST SP 800-53r4",
+    "section": "Appendix B",
+    "cats": [
+      "NIST SP 800-53r4"
+    ],
+    "rawDef": "Access to an organizational information system by a user (or process acting on behalf of a user) communicating through a direct connection without the use of a network.",
+    "authoritative": true
+  },
+  {
+    "id": "Malware",
+    "term": "Malware",
+    "source": "NIST SP 800-53r4",
+    "section": "Appendix B",
+    "cats": [
+      "NIST SP 800-53r4"
+    ],
+    "rawDef": "See [[Malicious Code]].",
+    "authoritative": true
+  },
+  {
+    "id": "Media",
+    "term": "Media",
+    "source": "NIST SP 800-53r4",
+    "section": "Appendix B",
+    "cats": [
+      "NIST SP 800-53r4"
+    ],
+    "rawDef": "Physical devices or writing surfaces including, but not limited to, magnetic tapes, optical disks, magnetic disks, Large-Scale Integration (LSI) memory chips, and printouts (but not including display media) onto which information is recorded, stored, or printed within an information system. [FIPS 200]",
+    "authoritative": true
+  },
+  {
+    "id": "Mobile Device",
+    "term": "Mobile Device",
+    "source": "NIST SP 800-53r4",
+    "section": "Appendix B",
+    "cats": [
+      "NIST SP 800-53r4"
+    ],
+    "rawDef": "A portable computing device that: (i) has a small form factor such that it can easily be carried by a single individual; (ii) is designed to operate without a physical connection (e.g., wirelessly transmit or receive information); (iii) possesses local, non-removable or removable data storage; and (iv) includes a self-contained power source. Mobile devices may also include voice communication capabilities, on-board sensors that allow the devices to capture information, and/or built-in features for synchronizing local data with remote locations. Examples include smart phones, tablets, and E-readers.",
+    "authoritative": true
+  },
+  {
+    "id": "Network Access",
+    "term": "Network Access",
+    "source": "NIST SP 800-53r4",
+    "section": "Appendix B",
+    "cats": [
+      "NIST SP 800-53r4"
+    ],
+    "rawDef": "Access to an information system by a user (or a process acting on behalf of a user) communicating through a network (e.g., local area network, wide area network, Internet).",
+    "authoritative": true
+  },
+  {
+    "id": "Non-repudiation",
+    "term": "Non-repudiation",
+    "source": "NIST SP 800-53r4",
+    "section": "Appendix B",
+    "cats": [
+      "NIST SP 800-53r4"
+    ],
+    "rawDef": "Protection against an individual falsely denying having performed a particular action. Provides the capability to determine whether a given individual took a particular action such as creating information, sending a message, approving information, and receiving a message.",
+    "authoritative": true
+  },
+  {
+    "id": "Penetration Testing",
+    "term": "Penetration Testing",
+    "source": "NIST SP 800-53r4",
+    "section": "Appendix B",
+    "cats": [
+      "NIST SP 800-53r4"
+    ],
+    "rawDef": "A test methodology in which assessors, typically working under specific constraints, attempt to circumvent or defeat the security features of an information system.",
+    "authoritative": true
+  },
+  {
+    "id": "Portable Storage Device",
+    "term": "Portable Storage Device",
+    "source": "NIST SP 800-53r4",
+    "section": "Appendix B",
+    "cats": [
+      "NIST SP 800-53r4"
+    ],
+    "rawDef": "An information system component that can be inserted into and removed from an information system, and that is used to store data or information (e.g., text, video, audio, and/or image data). Such components are typically implemented on magnetic, optical, or solid state devices (e.g., floppy disks, compact/digital video disks, flash/thumb drives, external hard disk drives, and flash memory cards/drives that contain non-volatile memory).",
+    "authoritative": true
+  },
+  {
+    "id": "Privileged User",
+    "term": "Privileged User",
+    "source": "NIST SP 800-53r4",
+    "section": "Appendix B",
+    "cats": [
+      "NIST SP 800-53r4"
+    ],
+    "rawDef": "A user that is authorized (and therefore, trusted) to perform security-relevant functions that ordinary users are not authorized to perform. [CNSSI 4009]",
+    "authoritative": true
+  },
+  {
+    "id": "Provenance",
+    "term": "Provenance",
+    "source": "NIST SP 800-53r4",
+    "section": "Appendix B",
+    "cats": [
+      "NIST SP 800-53r4"
+    ],
+    "rawDef": "The records describing the possession of, and changes to, components, component processes, information, systems, organization, and organizational processes. Provenance enables all changes to the baselines of components, component processes, information, systems, organizations, and organizational processes, to be reported to specific actors, functions, locales, or activities.",
+    "authoritative": true
+  },
+  {
+    "id": "Security Assessment Plan",
+    "term": "Security Assessment Plan",
+    "source": "NIST SP 800-53r4",
+    "section": "Appendix B",
+    "cats": [
+      "NIST SP 800-53r4"
+    ],
+    "rawDef": "The objectives for the security control assessment and a detailed roadmap of how to conduct such an assessment.",
+    "authoritative": true
+  },
+  {
+    "id": "Security Categorization",
+    "term": "Security Categorization",
+    "source": "NIST SP 800-53r4",
+    "section": "Appendix B",
+    "cats": [
+      "NIST SP 800-53r4"
+    ],
+    "rawDef": "The process of determining the security category for information or an information system. Security categorization methodologies are described in CNSS Instruction 1253 for national security systems and in FIPS Publication 199 for other than national security systems. See Security Category.",
+    "authoritative": true
+  },
+  {
+    "id": "Security Objective",
+    "term": "Security Objective",
+    "source": "NIST SP 800-53r4",
+    "section": "Appendix B",
+    "cats": [
+      "NIST SP 800-53r4"
+    ],
+    "rawDef": "Confidentiality, integrity, or availability. [FIPS 199]",
+    "authoritative": true
+  },
+  {
+    "id": "Security Requirement",
+    "term": "Security Requirement",
+    "source": "NIST SP 800-53r4",
+    "section": "Appendix B",
+    "cats": [
+      "NIST SP 800-53r4"
+    ],
+    "rawDef": "A requirement levied on an information system or an organization that is derived from applicable laws, Executive Orders, directives, policies, standards, instructions, regulations, procedures, and/or mission/business needs to ensure the confidentiality, integrity, and availability of information that is being processed, stored, or transmitted. Note: Security requirements can be used in a variety of contexts from high-level policy-related activities to low-level implementation-related activities in system development and engineering disciplines. [FIPS 200, Adapted]",
+    "authoritative": true
+  },
+  {
+    "id": "Supply Chain",
+    "term": "Supply Chain",
+    "source": "NIST SP 800-53r4",
+    "section": "Appendix B",
+    "cats": [
+      "NIST SP 800-53r4"
+    ],
+    "rawDef": "Linked set of resources and processes between multiple tiers of developers that begins with the sourcing of products and services and extends through the design, development, manufacturing, processing, handling, and delivery of products and services to the acquirer. [ISO 28001, Adapted]",
+    "authoritative": true
+  },
+  {
+    "id": "Threat Assessment",
+    "term": "Threat Assessment",
+    "source": "NIST SP 800-53r4",
+    "section": "Appendix B",
+    "cats": [
+      "NIST SP 800-53r4"
+    ],
+    "rawDef": "Formal description and evaluation of threat to an information system. [CNSSI 4009]",
+    "authoritative": true
+  },
+  {
+    "id": "Threat Source",
+    "term": "Threat Source",
+    "source": "NIST SP 800-53r4",
+    "section": "Appendix B",
+    "cats": [
+      "NIST SP 800-53r4"
+    ],
+    "rawDef": "The intent and method targeted at the intentional exploitation of a vulnerability or a situation and method that may accidentally trigger a vulnerability. Synonymous with threat agent. [FIPS 200]",
+    "authoritative": true
+  },
+  {
+    "id": "Trustworthiness",
+    "term": "Trustworthiness",
+    "source": "NIST SP 800-53r4",
+    "section": "Appendix B",
+    "cats": [
+      "NIST SP 800-53r4"
+    ],
+    "rawDef": "The attribute of a person or enterprise that provides confidence to others of the qualifications, capabilities, and reliability of that entity to perform specific tasks and fulfill assigned responsibilities. [CNSSI 4009]",
+    "authoritative": true
+  },
+  {
+    "id": "Whitelisting",
+    "term": "Whitelisting",
+    "source": "NIST SP 800-53r4",
+    "section": "Appendix B",
+    "cats": [
+      "NIST SP 800-53r4"
+    ],
+    "rawDef": "The process used to identify: (i) software programs that are authorized to execute on an information system; or (ii) authorized Universal Resource Locators (URL)/websites.",
+    "authoritative": true
+  }
+]

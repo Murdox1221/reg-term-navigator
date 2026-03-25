@@ -93,6 +93,9 @@ body{font-family:var(--sans);background:var(--bg);color:var(--text);min-height:1
 .def-link.visited{color:var(--visited);border-bottom-color:#b09cd0}
 .def-link.visited:hover{background:var(--visited-bg)}
 .def-unlinked{border-bottom:1.5px dashed var(--border2);color:var(--text2);cursor:help}
+.content-link{color:var(--accent);cursor:pointer;border-bottom:1.5px solid var(--accent-mid);font-weight:500;transition:background .1s;border-radius:2px;padding:0 1px;border-style:dotted}
+.content-link:hover{background:var(--accent-bg)}
+.content-link.visited{color:var(--visited);border-bottom-color:#b09cd0}
 .tdcats{display:flex;gap:5px;flex-wrap:wrap;padding-top:12px;border-top:1px solid var(--border)}
 .cat-tag{font-family:var(--mono);font-size:10px;padding:2px 7px;border-radius:20px;background:var(--surface2);color:var(--text3);border:1px solid var(--border)}
 .tli{padding:9px 14px;cursor:pointer;border-bottom:1px solid var(--border);transition:background .1s;display:flex;align-items:flex-start;gap:8px}
@@ -352,7 +355,7 @@ async function loadData() {
     renderTrail();
     const customs = _governance;
     const first = customs.length ? 'custom_' + customs[0].id : 'glossary';
-    switchGuide(first);
+    switchGuide(first, false);
   } catch(e) {
     console.error('loadData failed:', e);
     toast('Failed to load data from server');
@@ -390,6 +393,21 @@ function normalize(s){
     .replace(/s$/,'');         // users → user, systems → system
 }
 
+// Navigate to a content section, adding it to the trail
+// Trail items for content are stored as 'content:<secId>'
+function navToContent(secId, title, reset){
+  const trailId = 'content:' + secId;
+  if(reset) trail = [trailId];
+  else {
+    const i = trail.indexOf(trailId);
+    if(i > -1) trail = trail.slice(0, i+1);
+    else trail.push(trailId);
+  }
+  visited.add(trailId);
+  renderTrail();
+  switchGuide('custom_' + secId, false);
+}
+
 function findTerm(phrase){
   const p = phrase.toLowerCase().trim();
   const pn = normalize(p);
@@ -422,26 +440,50 @@ function findTerm(phrase){
 }
 function renderDefText(raw){
   return raw.replace(/\[\[([^\]]+)\]\]/g,(m,ph)=>{
+    // [[>Title]] = explicit content link
+    if(ph.startsWith('>')){
+      const title=ph.slice(1).trim();
+      const cs=loadCustomSections().find(function(s){return s.title.toLowerCase().trim()===title.toLowerCase().trim();});
+      if(cs){const v=visited.has('content:'+cs.id);return`<span class="content-link${v?' visited':''}" onclick="navToContent('${cs.id.replace(/'/g,"\\'")}','${cs.title.replace(/'/g,"\\'")}',false)" title="Open: ${escHtml(cs.title)}">${escHtml(title)} ↗</span>`;}
+      return`<span class="def-unlinked" title="Content section not found: ${escHtml(title)}">${escHtml(title)} ↗</span>`;
+    }
+    // Regular definition link
     const f=findTerm(ph);
-    if(f){const v=visited.has(f.id);return`<span class="def-link${v?' visited':''}" onclick="navTo('${f.id.replace(/'/g,"\\'")}',false)" title="${f.source} · ${f.section}">${ph}</span>`;}
+    if(f){const v=visited.has(f.id);return`<span class="def-link${v?' visited':''}" onclick="navTo('${f.id.replace(/'/g,"\\'")}',false)" title="${escHtml(f.source)} · ${escHtml(f.section||'')}">${ph}</span>`;}
     return`<span class="def-unlinked" title="Not yet in database">${ph}</span>`;
   });
 }
 function renderDrawerText(raw){
   return raw.replace(/\[\[([^\]]+)\]\]/g,(m,ph)=>{
+    // [[>Title]] = explicit content link
+    if(ph.startsWith('>')){
+      const title=ph.slice(1).trim();
+      const cs=loadCustomSections().find(function(s){return s.title.toLowerCase().trim()===title.toLowerCase().trim();});
+      if(cs){const v=visited.has('content:'+cs.id);return`<span class="content-link${v?' visited':''}" onclick="navToContent('${cs.id.replace(/'/g,"\\'")}','${cs.title.replace(/'/g,"\\'")}',true)" title="Open: ${escHtml(cs.title)}">${escHtml(title)} ↗</span>`;}
+      return`<span class="dwr-unlinked" title="Content section not found: ${escHtml(title)}">${escHtml(title)} ↗</span>`;
+    }
+    // Regular definition link
     const f=findTerm(ph);
-    if(f){const v=visited.has(f.id);return`<span class="dwr-def-link${v?' visited':''}" onclick="navTo('${f.id.replace(/'/g,"\\'")}',true)" title="${f.source} · ${f.section}">${ph}</span>`;}
+    if(f){const v=visited.has(f.id);return`<span class="dwr-def-link${v?' visited':''}" onclick="navTo('${f.id.replace(/'/g,"\\'")}',true)" title="${escHtml(f.source)} · ${escHtml(f.section||'')}">${ph}</span>`;}
     return`<span class="dwr-unlinked" title="Not yet in database">${ph}</span>`;
   });
 }
-
 function navTo(id,reset){
   if(reset)trail=[id];
   else{const i=trail.indexOf(id);if(i>-1)trail=trail.slice(0,i+1);else trail.push(id);}
   visited.add(id);
   renderTrail();renderTermDetail(id);
 }
-function jumpTrail(i){trail=trail.slice(0,i+1);renderTrail();renderTermDetail(trail[trail.length-1]);}
+function jumpTrail(i){
+  trail=trail.slice(0,i+1);
+  renderTrail();
+  const last=trail[trail.length-1];
+  if(last && last.startsWith('content:')){
+    switchGuide('custom_'+last.slice(8), false);
+  } else {
+    renderTermDetail(last);
+  }
+}
 function clearTrail(){
   trail=[];visited.clear();renderTrail();
   document.getElementById('defContent').innerHTML='<div class="def-empty"><div class="ico">◈</div><p>Click any underlined term<br>or blue chip in the guide<br>to see its definition here.</p></div>';
@@ -456,10 +498,19 @@ function renderTrail(){
   }
   let h='<span class="tl">trail:</span>';
   trail.forEach((id,i)=>{
-    const d=DB.find(x=>x.id===id);if(!d)return;
+    let label;
+    if(id.startsWith('content:')){
+      const secId = id.slice(8);
+      const sec = loadCustomSections().find(function(s){ return s.id===secId; });
+      label = sec ? '📄 '+sec.title : '📄 Content';
+    } else {
+      const d=DB.find(x=>x.id===id);
+      if(!d) return;
+      label = d.term;
+    }
     if(i>0)h+='<span class="ts">›</span>';
-    if(i===trail.length-1)h+=`<span class="tn cur">${d.term}</span>`;
-    else h+=`<span class="tn" onclick="jumpTrail(${i})">${d.term}</span>`;
+    if(i===trail.length-1)h+=`<span class="tn cur">${escHtml(label)}</span>`;
+    else h+=`<span class="tn" onclick="jumpTrail(${i})">${escHtml(label)}</span>`;
   });
   bar.innerHTML=h;
   if(btn){btn.style.opacity='1';btn.style.pointerEvents='auto';}
@@ -469,7 +520,12 @@ function renderTermDetail(id){
   const d=DB.find(x=>x.id===id);
   const panel=document.getElementById('defContent');
   if(!d){panel.innerHTML='<div class="def-empty"><p>Term not found</p></div>';return;}
-  const chain=trail.length>1?`<div class="tdc"><div class="tdc-lbl">reference chain</div><div class="tdc-nodes">${trail.map((tid,i)=>{const td=DB.find(x=>x.id===tid);return`${i>0?'<span class="cnarr">→</span>':''}<span class="cn${i===trail.length-1?' cur':''}" onclick="${i<trail.length-1?`jumpTrail(${i})`:''}" style="${i>=trail.length-1?'cursor:default':''}">${td?td.term:tid}</span>`;}).join('')}</div></div>`:'';
+  const chain=trail.length>1?`<div class="tdc"><div class="tdc-lbl">reference chain</div><div class="tdc-nodes">${trail.map((tid,i)=>{
+    let label;
+    if(tid.startsWith('content:')){const sec=loadCustomSections().find(x=>x.id===tid.slice(8));label='📄 '+(sec?sec.title:tid.slice(8));}
+    else{const td=DB.find(x=>x.id===tid);label=td?td.term:tid;}
+    return`${i>0?'<span class="cnarr">→</span>':''}<span class="cn${i===trail.length-1?' cur':''}" onclick="${i<trail.length-1?`jumpTrail(${i})`:''}" style="${i>=trail.length-1?'cursor:default':''}">${escHtml(label)}</span>`;
+  }).join('')}</div></div>`:'';
   const sc=srcClass(d.source);
   // Authoritative badge or note
   const isAuth = d.authoritative !== false; // default true if not set
@@ -560,17 +616,25 @@ document.getElementById('defSearch').addEventListener('input',e=>{
 });
 
 // GUIDE
-function switchGuide(name){
+function switchGuide(name, addToTrail){
   curGuide=name;
   const _gs = document.getElementById('govSwitcher');
   if(_gs && _gs.value !== name){ _gs.value = name; }
-  // Clear all active nav buttons
   const gs=document.getElementById('gsearch');
   if(name.startsWith('custom_')){
     const secId=name.slice(7);
     const customSecs=loadCustomSections();
     const sec=customSecs.find(function(s){return s.id===secId;});
     if(sec){
+      // Add to trail if requested or if called from dropdown
+      if(addToTrail !== false){
+        const trailId='content:'+secId;
+        const i=trail.indexOf(trailId);
+        if(i>-1) trail=trail.slice(0,i+1);
+        else trail.push(trailId);
+        visited.add(trailId);
+        renderTrail();
+      }
       document.getElementById('gTitle').textContent=sec.title;
       document.getElementById('gSub').textContent=sec.subtitle||'';
       gs.style.display='';gs.placeholder='Search...';
@@ -651,7 +715,7 @@ document.getElementById('saveBtn').addEventListener('click', async () => {
   saveDB();
   document.getElementById('mo').classList.remove('open');
   renderFilters();
-  switchGuide(curGuide);
+  switchGuide(curGuide, false);
   toast(`"${term}" saved`);
 });
 

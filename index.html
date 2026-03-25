@@ -493,12 +493,15 @@ function findTerm(phrase){
 const _quillInstances = {};
 
 function createQuillEditor(containerId, initialHTML, onChangeFn) {
+  // Destroy old instance if any
   if (_quillInstances[containerId]) {
     try { _quillInstances[containerId].off('text-change'); } catch(e){}
     delete _quillInstances[containerId];
   }
   const container = document.getElementById(containerId);
   if (!container) return null;
+  // Clear any leftover Quill DOM from previous init
+  container.innerHTML = '';
 
   const toolbarOptions = [
     [{ header: [1, 2, 3, false] }],
@@ -508,22 +511,21 @@ function createQuillEditor(containerId, initialHTML, onChangeFn) {
     ['clean']
   ];
 
-  const quill = new Quill('#' + containerId, {
+  // Quill 2.x takes a DOM element, not a selector
+  const quill = new Quill(container, {
     theme: 'snow',
     modules: { toolbar: { container: toolbarOptions } },
-    placeholder: 'Enter content… use the toolbar above for formatting.'
+    placeholder: 'Enter content…'
   });
 
-  // Add custom [[link]] buttons
-  setTimeout(function() {
-    const editorEl = document.getElementById(containerId);
-    if (!editorEl) return;
-    const toolbar = editorEl.previousElementSibling;
-    if (!toolbar || !toolbar.classList.contains('ql-toolbar')) return;
+  // Add [[d]] and [[↗]] buttons to the toolbar
+  const toolbar = quill.getModule('toolbar');
+  if (toolbar && toolbar.container) {
     const extraGroup = document.createElement('span');
     extraGroup.className = 'ql-formats';
     const defBtn = document.createElement('button');
-    defBtn.title = 'Insert definition link [[Term]]';
+    defBtn.type = 'button';
+    defBtn.title = 'Insert definition link';
     defBtn.innerHTML = '<span style="font-size:10px;font-family:monospace;font-weight:700;color:var(--accent)">[[d]]</span>';
     defBtn.onmousedown = function(e) {
       e.preventDefault();
@@ -533,7 +535,8 @@ function createQuillEditor(containerId, initialHTML, onChangeFn) {
       quill.insertText(range ? range.index : 0, '[[' + val.trim() + ']]', 'user');
     };
     const csBtn = document.createElement('button');
-    csBtn.title = 'Insert content section link [[>Title]]';
+    csBtn.type = 'button';
+    csBtn.title = 'Insert content section link';
     csBtn.innerHTML = '<span style="font-size:10px;font-family:monospace;font-weight:700;color:#16a34a">[[&#8599;]]</span>';
     csBtn.onmousedown = function(e) {
       e.preventDefault();
@@ -544,15 +547,15 @@ function createQuillEditor(containerId, initialHTML, onChangeFn) {
     };
     extraGroup.appendChild(defBtn);
     extraGroup.appendChild(csBtn);
-    toolbar.appendChild(extraGroup);
-  }, 80);
+    toolbar.container.appendChild(extraGroup);
+  }
 
   if (initialHTML && initialHTML.trim()) {
     quill.clipboard.dangerouslyPasteHTML(initialHTML);
   }
 
   quill.on('text-change', function() {
-    const html = quill.getSemanticHTML ? quill.getSemanticHTML() : quill.root.innerHTML;
+    const html = quill.root.innerHTML;
     if (onChangeFn) onChangeFn(html);
   });
 
@@ -1485,15 +1488,15 @@ function renderAdminEditor(id){
     </div>`;
   // Populate source dropdown now that DOM is ready
   populateSourceDropdown(draft.source);
-  // Init Quill for rawDef field
+  // Init Quill for rawDef and alsoIn fields
   setTimeout(function() {
-    if (document.getElementById('af-rawDef-editor')) {
+    const edRawDef = document.getElementById('af-rawDef-editor');
+    if (edRawDef) {
       createQuillEditor('af-rawDef-editor', draft.rawDef || '', function(html) {
         const d = getDraft(adminEditing);
         if (d) { d.rawDef = html; markDirty(adminEditing); }
       });
     }
-    // Init Quill for each alsoIn rawDef
     (draft.alsoIn || []).forEach(function(alt, idx) {
       const eid = 'af-also-rawDef-' + idx;
       if (document.getElementById(eid)) {
@@ -1503,7 +1506,7 @@ function renderAdminEditor(id){
         });
       }
     });
-  }, 0);
+  }, 50);
 }
 
 function adminFieldChange(field, value){
@@ -1595,6 +1598,16 @@ function adminToggleAlsoAuth(idx){
 }
 
 function adminSaveTerm(id){
+  // Flush any live Quill editors into the draft before saving
+  const rawDefQ = _quillInstances['af-rawDef-editor'];
+  if (rawDefQ) {
+    const d = getDraft(id);
+    if (d) d.rawDef = rawDefQ.root.innerHTML;
+  }
+  (getDraft(id)?.alsoIn || []).forEach(function(alt, idx) {
+    const q = _quillInstances['af-also-rawDef-' + idx];
+    if (q) alt.rawDef = q.root.innerHTML;
+  });
   const draft = adminDraft[id];
   if(!draft) return;
   // Validate

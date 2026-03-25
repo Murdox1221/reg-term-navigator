@@ -65,6 +65,17 @@ body{font-family:var(--sans);background:var(--bg);color:var(--text);min-height:1
 .gov-select{flex:1;height:26px;padding:0 24px 0 8px;border:1px solid var(--border);border-radius:var(--r);font-size:11px;font-family:var(--sans);background:var(--surface2);color:var(--text);outline:none;cursor:pointer;appearance:none;-webkit-appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='%23888'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 7px center;transition:border-color .1s}
 .gov-select:hover{border-color:var(--border2)}
 .gov-select:focus{border-color:var(--accent-mid)}
+/* Searchable select combobox */
+.ss-wrap{position:relative;display:inline-block;width:100%}
+.ss-input{width:100%;box-sizing:border-box;height:30px;padding:0 28px 0 10px;border:1px solid var(--border);border-radius:var(--r);font-size:12px;font-family:var(--sans);background:var(--surface2);color:var(--text);outline:none;cursor:pointer}
+.ss-input:focus{border-color:var(--accent-mid)}
+.ss-arrow{position:absolute;right:8px;top:50%;transform:translateY(-50%);pointer-events:none;color:var(--text3);font-size:10px}
+.ss-dropdown{position:absolute;top:100%;left:0;right:0;z-index:500;background:var(--surface);border:1px solid var(--border2);border-radius:var(--r);box-shadow:0 8px 24px rgba(0,0,0,.2);max-height:220px;overflow-y:auto;display:none;margin-top:2px}
+.ss-dropdown.open{display:block}
+.ss-option{padding:7px 12px;font-size:12px;font-family:var(--sans);color:var(--text);cursor:pointer;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.ss-option:hover,.ss-option.focused{background:var(--accent-bg);color:var(--accent)}
+.ss-option.selected{font-weight:500;color:var(--accent)}
+.ss-none{padding:7px 12px;font-size:11px;font-family:var(--mono);color:var(--text3)}
 .def-content{flex:1;overflow-y:auto}
 .def-content::-webkit-scrollbar{width:4px}
 .def-content::-webkit-scrollbar-thumb{background:var(--border2);border-radius:2px}
@@ -407,6 +418,8 @@ async function loadData() {
     const customs = _governance;
     const first = customs.length ? 'custom_' + customs[0].id : 'glossary';
     switchGuide(first, false);
+    // Init searchable selects after data is ready
+    setTimeout(initSearchableSelects, 0);
   } catch(e) {
     console.error('loadData failed:', e);
     toast('Failed to load data from server');
@@ -1047,6 +1060,137 @@ function triggerImport(collection){
 
 const SESSION_KEY = 'regnavSession_v1';
 
+// ── Searchable Select (combobox) ──────────────────────────────────────────────
+// Wraps a <select> element with a text input + dropdown for live filtering.
+// Usage: makeSearchable(document.getElementById('mySelect'))
+// The original <select> is kept hidden and kept in sync for form/event compat.
+
+function makeSearchable(selectEl) {
+  if (!selectEl || selectEl.dataset.searchable) return; // already done
+  selectEl.dataset.searchable = '1';
+  selectEl.style.display = 'none';
+
+  // Build wrapper
+  var wrap = document.createElement('div');
+  wrap.className = 'ss-wrap';
+  selectEl.parentNode.insertBefore(wrap, selectEl);
+  wrap.appendChild(selectEl);
+
+  var input = document.createElement('input');
+  input.type = 'text';
+  input.className = 'ss-input';
+  input.autocomplete = 'off';
+  input.spellcheck = false;
+
+  var arrow = document.createElement('span');
+  arrow.className = 'ss-arrow';
+  arrow.textContent = '▾';
+
+  var dropdown = document.createElement('div');
+  dropdown.className = 'ss-dropdown';
+
+  wrap.insertBefore(input, selectEl);
+  wrap.insertBefore(arrow, selectEl);
+  wrap.appendChild(dropdown);
+
+  function getOptions() {
+    return Array.from(selectEl.options).map(function(o) {
+      return { value: o.value, text: o.textContent.trim(), disabled: o.disabled };
+    });
+  }
+
+  function syncInputFromSelect() {
+    var sel = selectEl.options[selectEl.selectedIndex];
+    input.value = sel ? sel.textContent.trim() : '';
+    input.dataset.selected = selectEl.value;
+  }
+
+  function renderDropdown(filter) {
+    var opts = getOptions();
+    var q = (filter || '').toLowerCase().trim();
+    var html = '';
+    opts.forEach(function(o) {
+      if (o.disabled) return;
+      if (q && !o.text.toLowerCase().includes(q) && !o.value.toLowerCase().includes(q)) return;
+      var isSel = o.value === selectEl.value;
+      html += '<div class="ss-option' + (isSel ? ' selected' : '') + '" data-value="' + escHtml(o.value) + '">' + escHtml(o.text) + '</div>';
+    });
+    dropdown.innerHTML = html || '<div class="ss-none">No matches</div>';
+  }
+
+  function openDropdown() {
+    renderDropdown(input.value);
+    dropdown.classList.add('open');
+  }
+
+  function closeDropdown() {
+    dropdown.classList.remove('open');
+    syncInputFromSelect(); // revert input to current selection
+  }
+
+  function selectValue(value) {
+    selectEl.value = value;
+    // Fire change event on the original select
+    var evt = new Event('change', { bubbles: true });
+    selectEl.dispatchEvent(evt);
+    syncInputFromSelect();
+    dropdown.classList.remove('open');
+  }
+
+  input.addEventListener('focus', function() { input.select(); openDropdown(); });
+  input.addEventListener('input', function() { renderDropdown(input.value); dropdown.classList.add('open'); });
+  input.addEventListener('keydown', function(e) {
+    var items = dropdown.querySelectorAll('.ss-option');
+    var focused = dropdown.querySelector('.ss-option.focused');
+    var idx = focused ? Array.from(items).indexOf(focused) : -1;
+    if (e.key === 'ArrowDown') {
+      e.preventDefault();
+      if (focused) focused.classList.remove('focused');
+      var next = items[idx + 1] || items[0];
+      if (next) { next.classList.add('focused'); next.scrollIntoView({ block: 'nearest' }); }
+    } else if (e.key === 'ArrowUp') {
+      e.preventDefault();
+      if (focused) focused.classList.remove('focused');
+      var prev = items[idx - 1] || items[items.length - 1];
+      if (prev) { prev.classList.add('focused'); prev.scrollIntoView({ block: 'nearest' }); }
+    } else if (e.key === 'Enter') {
+      e.preventDefault();
+      var target = focused || dropdown.querySelector('.ss-option');
+      if (target) selectValue(target.dataset.value);
+    } else if (e.key === 'Escape') {
+      closeDropdown();
+    }
+  });
+
+  dropdown.addEventListener('mousedown', function(e) {
+    var opt = e.target.closest('.ss-option');
+    if (opt) { e.preventDefault(); selectValue(opt.dataset.value); }
+  });
+
+  document.addEventListener('mousedown', function(e) {
+    if (!wrap.contains(e.target)) closeDropdown();
+  });
+
+  // Keep input in sync if select is updated programmatically
+  var observer = new MutationObserver(function() {
+    syncInputFromSelect();
+    if (dropdown.classList.contains('open')) renderDropdown(input.value);
+  });
+  observer.observe(selectEl, { childList: true, subtree: true, attributes: true, attributeFilter: ['value'] });
+
+  syncInputFromSelect();
+  return { sync: syncInputFromSelect };
+}
+
+// Apply to static selects on page load
+function initSearchableSelects() {
+  var ids = ['govSwitcher', 'govSelect', 'adminSourceFilter'];
+  ids.forEach(function(id) {
+    var el = document.getElementById(id);
+    if (el) makeSearchable(el);
+  });
+}
+
 // Bootstrap: load all data from server then render
 loadData();
 
@@ -1305,7 +1449,12 @@ function renderCustomSectionEditor(editor, secId){
     + '</div>';
 
   // Init Quill for every body field in this section
-  setTimeout(function() { csInitQuillEditors(secId); }, 50);
+  setTimeout(function() {
+    csInitQuillEditors(secId);
+    // Make governance source selector searchable
+    var govSel = document.getElementById('gov-src-sel-'+secId);
+    if(govSel && !govSel.dataset.searchable) makeSearchable(govSel);
+  }, 50);
 }
 
 function csInitQuillEditors(secId) {
@@ -1392,9 +1541,15 @@ function populateAdminSourceFilter(){
     ? _sources.map(s => s.name).sort()
     : [...new Set(DB.map(d => d.source))].sort(); // fallback if no sources defined yet
   const sel = document.getElementById('adminSourceFilter');
+  if(!sel) return;
   const prev = sel.value;
   sel.innerHTML = '<option value="">All sources</option>' +
     sources.map(s => `<option value="${escHtml(s)}"${prev===s?' selected':''}>${escHtml(s)}</option>`).join('');
+  if(!sel.dataset.searchable) makeSearchable(sel);
+  else {
+    var ssInput = sel.parentElement && sel.parentElement.querySelector('.ss-input');
+    if(ssInput){ var cur=sel.options[sel.selectedIndex]; ssInput.value=cur?cur.textContent.trim():''; ssInput.dataset.selected=sel.value; }
+  }
 }
 
 function renderAdminList(){
@@ -1455,6 +1610,13 @@ function populateSourceDropdown(currentSource){
     + srcs.sort((a,b) => a.name.localeCompare(b.name))
           .map(s => `<option value="${escHtml(s.name)}"${currentSource===s.name?' selected':''}>${escHtml(s.name)}</option>`)
           .join('');
+  // Re-apply searchable if not already done
+  if(!sel.dataset.searchable) makeSearchable(sel);
+  else {
+    // Already wrapped — just sync the display
+    var ssInput = sel.parentElement && sel.parentElement.querySelector('.ss-input');
+    if(ssInput){ var cur=sel.options[sel.selectedIndex]; ssInput.value=cur?cur.textContent.trim():''; }
+  }
 }
 
 function renderAdminEditor(id){
@@ -1477,7 +1639,7 @@ function renderAdminEditor(id){
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px">
         <div class="admin-field">
           <label>Source</label>
-          <select onchange="adminUpdateAlso(${i},'source',this.value)">
+          <select id="af-also-src-${i}" onchange="adminUpdateAlso(${i},'source',this.value)">
             <option value="">— select source document —</option>
             ${srcOptions}
           </select>
@@ -1585,7 +1747,13 @@ function renderAdminEditor(id){
           if (d && d.alsoIn && d.alsoIn[idx]) { d.alsoIn[idx].rawDef = html; markDirty(adminEditing); }
         });
       }
+      // Make alsoIn source select searchable
+      var alsoSrc = document.querySelector('#af-also-src-' + idx);
+      if(alsoSrc && !alsoSrc.dataset.searchable) makeSearchable(alsoSrc);
     });
+    // Make af-source searchable (may already be done by populateSourceDropdown)
+    var afSrc = document.getElementById('af-source');
+    if(afSrc && !afSrc.dataset.searchable) makeSearchable(afSrc);
   }, 50);
 }
 
@@ -2633,6 +2801,12 @@ function rebuildGovSwitcher(){
   sel.innerHTML = html;
   sel.value = curGuide;
   if(sel.value !== curGuide) sel.selectedIndex = 0;
+  // Apply or sync searchable combobox
+  if(!sel.dataset.searchable){ makeSearchable(sel); }
+  else {
+    var ssInput = sel.parentElement && sel.parentElement.querySelector('.ss-input');
+    if(ssInput){ var cur=sel.options[sel.selectedIndex]; ssInput.value=cur?cur.textContent.trim():''; }
+  }
 }
 
 function rebuildNavTabs(){

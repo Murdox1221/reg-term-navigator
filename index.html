@@ -232,10 +232,8 @@ body{font-family:var(--sans);background:var(--bg);color:var(--text);min-height:1
 </div>
 
 <div class="trail-bar" id="trailBar">
-  <span class="tl">trail:</span>
-  <span class="te">click a term chip or underlined word to explore definitions</span>
-  <div style="flex:1"></div>
-  <button class="btn btn-sm" id="clearTrailBtn" onclick="clearTrail()" style="opacity:.4;pointer-events:none;flex-shrink:0;font-size:11px" title="Clear trail">↺ Clear Trail</button>
+  <span id="trailContent" style="display:flex;align-items:center;gap:5px;flex:1;overflow:hidden;min-width:0"><span class="tl">trail:</span><span class="te">click a term chip or underlined word to explore definitions</span></span>
+  <button class="btn btn-sm" id="clearTrailBtn" onclick="clearTrail()" style="opacity:.4;pointer-events:none;flex-shrink:0;font-size:11px;margin-left:8px" title="Clear trail">↺ Clear Trail</button>
 </div>
 
 <div class="app-body">
@@ -492,16 +490,9 @@ function clearTrail(){
 function renderTrail(){
   const bar=document.getElementById('trailBar');
   const btn=document.getElementById('clearTrailBtn');
-  // Use a dedicated span for trail content so the button is never overwritten
-  let trailContent = document.getElementById('trailContent');
-  if(!trailContent){
-    trailContent = document.createElement('span');
-    trailContent.id = 'trailContent';
-    trailContent.style.cssText = 'display:flex;align-items:center;gap:5px;flex:1;overflow:hidden';
-    bar.insertBefore(trailContent, btn || null);
-  }
+  const trailContent = document.getElementById('trailContent');
   if(!trail.length){
-    trailContent.innerHTML='<span class="tl">trail:</span><span class="te">click a term chip or underlined word to explore definitions</span>';
+    if(trailContent) trailContent.innerHTML='<span class="tl">trail:</span><span class="te">click a term chip or underlined word to explore definitions</span>';
     if(btn){btn.style.opacity='.4';btn.style.pointerEvents='none';}
     return;
   }

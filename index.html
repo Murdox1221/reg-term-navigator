@@ -233,7 +233,7 @@ body{font-family:var(--sans);background:var(--bg);color:var(--text);min-height:1
 <body>
 
 <div class="topnav">
-  <div class="logo">Reg<span>//</span>Nav</div>
+  <div class="logo">reg<span>//</span>nav</div>
   <div class="nav-div"></div>
   <div class="nav-links" id="navLinks">
     <button class="nav-link" id="navG" onclick="switchGuide('glossary')"><span class="nav-dot"></span>All Terms</button>
@@ -378,9 +378,42 @@ function saveDB() {
 
 function toast(m){const t=document.getElementById('toast');t.textContent=m;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),2200);}
 
+function normalize(s){
+  s = s.toLowerCase().trim();
+  // Strip common plural/verb suffixes for fuzzy matching
+  return s
+    .replace(/ies$/,'y')      // abilities → ability
+    .replace(/ves$/,'f')      // leaves → leaf
+    .replace(/sses$/,'ss')    // processes → process (guard double-s)
+    .replace(/ses$/,'s')      // statuses → status
+    .replace(/ches$/,'ch')    // matches → match
+    .replace(/shes$/,'sh')    // hashes → hash
+    .replace(/xes$/,'x')      // indexes → index
+    .replace(/zes$/,'z')      // analyzes → analyze
+    .replace(/ing$/,'')       // processing → process
+    .replace(/tion$/,'t')     // authentication → authenticat (rough)
+    .replace(/ed$/,'')        // authenticated → authenticat
+    .replace(/s$/,'');         // users → user, systems → system
+}
+
 function findTerm(phrase){
-  const p=phrase.toLowerCase().trim();
-  return DB.find(d=>d.id.toLowerCase()===p||d.term.toLowerCase()===p||d.term.toLowerCase().includes(p)||p.includes(d.term.toLowerCase())||p.includes(d.id.toLowerCase()));
+  const p = phrase.toLowerCase().trim();
+  const pn = normalize(p);
+  return DB.find(d => {
+    const id = d.id.toLowerCase();
+    const term = d.term.toLowerCase();
+    const idn = normalize(id);
+    const termn = normalize(term);
+    // Exact match first
+    if(id === p || term === p) return true;
+    // Normalized exact match
+    if(idn === pn || termn === pn) return true;
+    // Substring (original phrase contains term, or term contains phrase)
+    if(term.includes(p) || p.includes(term)) return true;
+    // Normalized substring
+    if(termn.includes(pn) || pn.includes(termn)) return true;
+    return false;
+  });
 }
 function renderDefText(raw){
   return raw.replace(/\[\[([^\]]+)\]\]/g,(m,ph)=>{

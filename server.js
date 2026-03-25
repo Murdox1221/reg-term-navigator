@@ -6,10 +6,22 @@ const path = require('path');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
-const DATA_DIR = path.join(__dirname, 'data');
+// Use Render persistent disk if available, otherwise fall back to local ./data
+const DATA_DIR = process.env.RENDER_DISK_PATH || path.join(__dirname, 'data');
 
 // ── Ensure data directory exists ──────────────────────────────────────────────
 if (!fs.existsSync(DATA_DIR)) fs.mkdirSync(DATA_DIR, { recursive: true });
+
+// ── Seed from repo on first boot (disk is empty after first attach) ───────────
+const SEED_DIR = path.join(__dirname, 'data');
+['definitions.json', 'governance.json', 'sources.json', 'users.json'].forEach(file => {
+  const target = path.join(DATA_DIR, file);
+  const seed   = path.join(SEED_DIR, file);
+  if (!fs.existsSync(target) && fs.existsSync(seed)) {
+    fs.copyFileSync(seed, target);
+    console.log('Seeded from repo:', file);
+  }
+});
 
 const FILES = {
   definitions: path.join(DATA_DIR, 'definitions.json'),

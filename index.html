@@ -273,7 +273,10 @@ body{font-family:var(--sans);background:var(--bg);color:var(--text);min-height:1
     <div class="gph">
       <div>
         <div class="gph-title" id="gTitle">All Terms</div>
-        <div class="gph-sub" id="gSub"></div>
+        <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
+          <div class="gph-sub" id="gSub"></div>
+          <a id="gViewSource" href="#" target="_blank" rel="noopener" style="display:none;font-size:11px;font-family:var(--mono);color:var(--accent);text-decoration:none;border:1px solid var(--ccmmcborder);background:var(--ccmmcbg);padding:2px 8px;border-radius:var(--r);white-space:nowrap" title="Open source document">View Source ↗</a>
+        </div>
       </div>
       <input class="gsearch" type="text" id="gsearch" placeholder="Search...">
     </div>
@@ -637,12 +640,26 @@ function switchGuide(name, addToTrail){
       }
       document.getElementById('gTitle').textContent=sec.title;
       document.getElementById('gSub').textContent=sec.subtitle||'';
+      // Show View Source button if source has a URL
+      const _srcDoc = loadGovDocs().find(function(s){ return s.name===sec.title; });
+      const _vsEl = document.getElementById('gViewSource');
+      if(_vsEl){
+        if(_srcDoc && _srcDoc.url){
+          _vsEl.href = _srcDoc.url;
+          _vsEl.textContent = 'View Source ↗';
+          _vsEl.style.display='';
+        } else {
+          _vsEl.style.display='none';
+        }
+      }
       gs.style.display='';gs.placeholder='Search...';
       renderCustomGuide(secId);
     }
   }else{
     document.getElementById('gTitle').textContent='All Terms';
     document.getElementById('gSub').textContent=DB.length+' terms in database';
+    const _vsElG = document.getElementById('gViewSource');
+    if(_vsElG) _vsElG.style.display='none';
     gs.style.display='';gs.placeholder='Search terms...';renderGlossaryGuide();
   }
 }

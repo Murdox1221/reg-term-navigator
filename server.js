@@ -1,23 +1,78 @@
-const express=require('express');
-const fs=require('fs');
-const path=require('path');
-const app=express();
-const PORT=process.env.PORT||3000;
+let PRACTICE_DATA = {};
+let FRAMEWORKS = [];
 
-app.use(express.json());
-app.use(express.static(__dirname));
+async function loadData(){
+  const res = await fetch('/api/data');
+  const data = await res.json();
+  PRACTICE_DATA = data.practices || {};
+  FRAMEWORKS = data.frameworks || [];
+  renderNav();
+}
 
-const FILE='./data.json';
+function renderNav(){
+  const nav = document.getElementById('nav');
+  nav.innerHTML = '';
+  FRAMEWORKS.forEach(f=>{
+    const b=document.createElement('button');
+    b.innerText=f.name;
+    b.onclick=()=>renderFramework(f.id);
+    nav.appendChild(b);
+  });
+}
 
-app.get('/api/data',(req,res)=>{
- res.json(JSON.parse(fs.readFileSync(FILE)));
-});
+function renderFramework(id){
+  const fw = FRAMEWORKS.find(f=>f.id===id);
+  const c = document.getElementById('content');
+  c.innerHTML = `<h2>${fw.name}</h2><button onclick="addControl('${id}')">+ Control</button>`;
 
-app.post('/api/practices',(req,res)=>{
- const d=JSON.parse(fs.readFileSync(FILE));
- d.practices=req.body;
- fs.writeFileSync(FILE,JSON.stringify(d,null,2));
- res.sendStatus(200);
-});
+  fw.controls.forEach(ctrl=>{
+    const div=document.createElement('div');
+    const mapped = (ctrl.mapsTo||[]).join(', ');
+    div.innerHTML = `
+      <h3>${ctrl.id} - ${ctrl.title}</h3>
+      <p>${ctrl.description}</p>
+      <small>Mapped: ${mapped}</small><br>
+      <button onclick="mapControl('${fw.id}','${ctrl.id}')">Map</button>
+    `;
+    c.appendChild(div);
+  });
+}
 
-app.listen(PORT,()=>console.log('running '+PORT));
+function addFramework(){
+  const name = prompt('Framework name');
+  if(!name) return;
+  const id = name.toLowerCase().replace(/\s+/g,'-');
+  FRAMEWORKS.push({id,name,controls:[]});
+  saveFrameworks();
+  renderNav();
+}
+
+function addControl(fid){
+  const fw = FRAMEWORKS.find(f=>f.id===fid);
+  const id = prompt('Control ID');
+  const title = prompt('Title');
+  if(!id||!title) return;
+  fw.controls.push({id,title,description:'',mapsTo:[]});
+  saveFrameworks();
+  renderFramework(fid);
+}
+
+function mapControl(fid,cid){
+  const pid = prompt('Practice ID (e.g., AC-1)');
+  if(!pid) return;
+  const fw = FRAMEWORKS.find(f=>f.id===fid);
+  const ctrl = fw.controls.find(c=>c.id===cid);
+  if(!ctrl.mapsTo.includes(pid)) ctrl.mapsTo.push(pid);
+  saveFrameworks();
+  renderFramework(fid);
+}
+
+async function saveFrameworks(){
+  await fetch('/api/frameworks',{
+    method:'POST',
+    headers:{'Content-Type':'application/json'},
+    body:JSON.stringify(FRAMEWORKS)
+  });
+}
+
+window.addEventListener('DOMContentLoaded',loadData);

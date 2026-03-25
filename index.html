@@ -572,9 +572,19 @@ function createQuillEditor(containerId, initialHTML, onChangeFn) {
 }
 
 // ── Rich text display: activate [[links]] inside stored HTML ──────────────────
+function decodeHtmlEntities(str) {
+  return str
+    .replace(/&gt;/g, '>')
+    .replace(/&lt;/g, '<')
+    .replace(/&amp;/g, '&')
+    .replace(/&quot;/g, '"')
+    .replace(/&#39;/g, "'");
+}
+
 function activateLinks(html, fromDrawer) {
   if (!html) return '';
   return html.replace(/\[\[([^\]]+)\]\]/g, function(m, ph) {
+    ph = decodeHtmlEntities(ph);
     if (ph.startsWith('>')) {
       var title = ph.slice(1).trim();
       var cs = loadCustomSections().find(function(s) {
@@ -867,14 +877,8 @@ document.getElementById('saveBtn').addEventListener('click', async () => {
 });
 
 // ── Export: download a collection directly from /data/ on the server ──
-function exportJSON(){
-  openDataModal('export');
-}
-
-// ── Import: upload a JSON file and replace a collection on the server ──
-function importJSON(){
-  openDataModal('import');
-}
+function exportJSON(){ openDataModal('export'); }
+function importJSON(){ openDataModal('import'); }
 
 // ── Data modal (export + import) ──
 function openDataModal(mode){
@@ -912,7 +916,7 @@ function openDataModal(mode){
         </div>
         ${isExport
           ? `<div style="padding:10px 14px;font-size:11px;font-family:var(--mono);color:var(--text3);background:var(--surface2);border-bottom:1px solid var(--border)">
-               Downloads the live file from the server's /data/ directory
+               Downloads the live data from the database
              </div>`
           : `<div style="padding:10px 14px;font-size:11px;font-family:var(--mono);color:var(--text3);background:var(--surface2);border-bottom:1px solid var(--border)">
                ⚠ Replaces the entire collection. A backup (.bak) is created automatically.
@@ -926,28 +930,17 @@ function openDataModal(mode){
     </div>`;
 
   document.body.insertAdjacentHTML('beforeend', html);
-
-  // Hidden file input for import
-  if(!isExport){
-    let fi = document.getElementById('importFileInput');
-    if(!fi){
-      fi = document.createElement('input');
-      fi.type = 'file'; fi.id = 'importFileInput'; fi.accept = '.json';
-      fi.style.display = 'none';
-      document.body.appendChild(fi);
-    }
-    fi.onchange = null; // reset
-  }
 }
 
-let _importTarget = null;
 function triggerImport(collection){
-  _importTarget = collection;
-  const fi = document.getElementById('importFileInput') || (() => {
-    const el = document.createElement('input');
-    el.type='file'; el.id='importFileInput'; el.accept='.json'; el.style.display='none';
-    document.body.appendChild(el); return el;
-  })();
+  let fi = document.getElementById('importFileInput');
+  if(!fi){
+    fi = document.createElement('input');
+    fi.type='file'; fi.id='importFileInput'; fi.accept='.json';
+    fi.style.display='none';
+    document.body.appendChild(fi);
+  }
+  fi.accept = '.json';
   fi.value = '';
   fi.onchange = async function(){
     const file = fi.files[0];
@@ -956,7 +949,7 @@ function triggerImport(collection){
       const text = await file.text();
       const data = JSON.parse(text);
       if(!Array.isArray(data)) throw new Error('File must contain a JSON array');
-      const r = await fetch('/api/import/' + _importTarget, {
+      const r = await fetch('/api/import/' + collection, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(data)
@@ -964,7 +957,7 @@ function triggerImport(collection){
       const result = await r.json();
       if(!r.ok) throw new Error(result.error || 'Import failed');
       document.getElementById('dataModal')?.remove();
-      toast('Imported ' + result.count + ' ' + _importTarget + ' — reloading...');
+      toast('Imported ' + result.count + ' ' + collection + ' — reloading...');
       setTimeout(() => loadData(), 1200);
     } catch(e) {
       toast('Import failed: ' + e.message);

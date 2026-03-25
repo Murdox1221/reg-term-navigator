@@ -1,5 +1,5 @@
 {
-  "practices": {},
-  "terms": [],
-  "cfr": []
+ "practices":{
+  "AC-1":{"title":"Access Control","discussion":"Edit me"}
+ }
 }

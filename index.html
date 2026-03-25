@@ -534,7 +534,7 @@ function createQuillEditor(containerId, initialHTML, onChangeFn) {
     defBtn.innerHTML = '<span style="font-size:10px;font-family:monospace;font-weight:700;color:#3b82f6">[[d]]</span>';
     defBtn.addEventListener('mousedown', function(e) {
       e.preventDefault();
-      var val = window.prompt('Definition term name:');
+      var val = window.prompt('Definition term name (or "Term|Display Text" for custom label):');
       if (!val || !val.trim()) return;
       var range = quill.getSelection(true);
       quill.insertText(range ? range.index : quill.getLength(), '[[' + val.trim() + ']]');
@@ -605,13 +605,17 @@ function activateLinks(html, fromDrawer) {
       }
       return '<span class="rn-unlinked" title="Content section not found: ' + escHtml(target) + '">' + escHtml(display) + ' \u2197</span>';
     }
-    var f = findTerm(ph);
+    // Support [[Term|Display Text]] syntax for definitions
+    var defPipeIdx = ph.indexOf('|');
+    var defTarget  = defPipeIdx !== -1 ? ph.slice(0, defPipeIdx).trim() : ph;
+    var defDisplay = defPipeIdx !== -1 ? ph.slice(defPipeIdx + 1).trim() : ph;
+    var f = findTerm(defTarget);
     if (f) {
       var v2 = visited.has(f.id);
       var reset2 = fromDrawer ? 'true' : 'false';
-      return '<span class="rn-def-link' + (v2 ? ' visited' : '') + '" onclick="navTo(\'' + f.id.replace(/'/g, "\\'") + '\',' + reset2 + ')" title="' + escHtml(f.source) + ' \xb7 ' + escHtml(f.section || '') + '">' + ph + '</span>';
+      return '<span class="rn-def-link' + (v2 ? ' visited' : '') + '" onclick="navTo(\'' + f.id.replace(/'/g, "\\'") + '\',' + reset2 + ')" title="' + escHtml(f.source) + ' \xb7 ' + escHtml(f.section || '') + '">' + escHtml(defDisplay) + '</span>';
     }
-    return '<span class="rn-unlinked" title="Not yet in database">' + ph + '</span>';
+    return '<span class="rn-unlinked" title="Not yet in database: ' + escHtml(defTarget) + '">' + escHtml(defDisplay) + '</span>';
   });
 }
 

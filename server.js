@@ -1,115 +1,183 @@
 'use strict';
 
 const express = require('express');
-const fs = require('fs');
-const path = require('path');
+const fs      = require('fs');
+const path    = require('path');
+const Database = require('better-sqlite3');
 
-const app = express();
-const PORT = process.env.PORT || 3000;
-// Use Render persistent disk if available, otherwise fall back to local ./data
+const app     = express();
+const PORT    = process.env.PORT || 3000;
 const DATA_DIR = process.env.RENDER_DISK_PATH || path.join(__dirname, 'data');
+const DB_PATH  = path.join(DATA_DIR, 'regnav.db');
+const SEED_DIR = path.join(__dirname, 'data');
 
 // ── Ensure data directory exists ──────────────────────────────────────────────
 if (!fs.existsSync(DATA_DIR)) fs.mkdirSync(DATA_DIR, { recursive: true });
 
-// ── Seed from repo on first boot (disk is empty after first attach) ───────────
-const SEED_DIR = path.join(__dirname, 'data');
-['definitions.json', 'governance.json', 'sources.json', 'users.json'].forEach(file => {
-  const target = path.join(DATA_DIR, file);
-  const seed   = path.join(SEED_DIR, file);
-  if (!fs.existsSync(target) && fs.existsSync(seed)) {
-    fs.copyFileSync(seed, target);
-    console.log('Seeded from repo:', file);
-  }
-});
+// ── Open / create database ────────────────────────────────────────────────────
+const db = new Database(DB_PATH);
+db.pragma('journal_mode = WAL');
+db.pragma('foreign_keys = ON');
 
-const FILES = {
-  definitions: path.join(DATA_DIR, 'definitions.json'),
-  governance:  path.join(DATA_DIR, 'governance.json'),
-  sources:     path.join(DATA_DIR, 'sources.json'),
-  users:       path.join(DATA_DIR, 'users.json'),
-};
+// ── Schema ────────────────────────────────────────────────────────────────────
+db.exec(`
+  CREATE TABLE IF NOT EXISTS definitions (
+    id       TEXT PRIMARY KEY,
+    data     TEXT NOT NULL
+  );
+  CREATE TABLE IF NOT EXISTS governance (
+    id       TEXT PRIMARY KEY,
+    position INTEGER NOT NULL DEFAULT 0,
+    data     TEXT NOT NULL
+  );
+  CREATE TABLE IF NOT EXISTS sources (
+    id       TEXT PRIMARY KEY,
+    data     TEXT NOT NULL
+  );
+  CREATE TABLE IF NOT EXISTS users (
+    username TEXT PRIMARY KEY,
+    data     TEXT NOT NULL
+  );
+`);
+
+// ── Seed from JSON files on first boot ────────────────────────────────────────
+function seedTable(table, jsonFile, getId) {
+  const count = db.prepare('SELECT COUNT(*) as n FROM ' + table).get().n;
+  if (count > 0) return;
+
+  const file = path.join(SEED_DIR, jsonFile);
+  if (!fs.existsSync(file)) return;
+
+  try {
+    const rows = JSON.parse(fs.readFileSync(file, 'utf8'));
+    if (!Array.isArray(rows) || rows.length === 0) return;
+
+    const sql = table === 'governance'
+      ? 'INSERT OR IGNORE INTO ' + table + ' (id, position, data) VALUES (?, ?, ?)'
+      : 'INSERT OR IGNORE INTO ' + table + ' (id, data) VALUES (?, ?)';
+    const insert = db.prepare(sql);
+
+    const insertMany = db.transaction((items) => {
+      items.forEach((item, i) => {
+        const id = getId(item);
+        if (!id) return;
+        if (table === 'governance') {
+          insert.run(id, i, JSON.stringify(item));
+        } else {
+          insert.run(id, JSON.stringify(item));
+        }
+      });
+    });
+
+    insertMany(rows);
+    console.log('Seeded ' + rows.length + ' rows into ' + table + ' from ' + jsonFile);
+  } catch (e) {
+    console.error('Seed error (' + table + '):', e.message);
+  }
+}
+
+seedTable('definitions', 'definitions.json', r => r.id);
+seedTable('governance',  'governance.json',  r => r.id);
+seedTable('sources',     'sources.json',     r => r.id);
+seedTable('users',       'users.json',       r => r.username);
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
-function readJSON(file, fallback = []) {
-  try {
-    if (!fs.existsSync(file)) return fallback;
-    return JSON.parse(fs.readFileSync(file, 'utf8'));
-  } catch (e) {
-    console.error('readJSON error:', file, e.message);
-    return fallback;
-  }
+function readTable(table) {
+  const orderBy = table === 'governance' ? 'ORDER BY position' : 'ORDER BY id';
+  return db.prepare('SELECT data FROM ' + table + ' ' + orderBy)
+           .all()
+           .map(r => JSON.parse(r.data));
 }
 
-function writeJSON(file, data) {
-  fs.writeFileSync(file, JSON.stringify(data, null, 2), 'utf8');
+function replaceTable(table, rows, getId) {
+  const replace = db.transaction((items) => {
+    db.prepare('DELETE FROM ' + table).run();
+    const sql = table === 'governance'
+      ? 'INSERT INTO ' + table + ' (id, position, data) VALUES (?, ?, ?)'
+      : 'INSERT INTO ' + table + ' (id, data) VALUES (?, ?)';
+    const insert = db.prepare(sql);
+    items.forEach((item, i) => {
+      const id = getId(item);
+      if (!id) return;
+      if (table === 'governance') {
+        insert.run(id, i, JSON.stringify(item));
+      } else {
+        insert.run(id, JSON.stringify(item));
+      }
+    });
+  });
+  replace(rows);
 }
+
+const TABLE_META = {
+  definitions: { getId: r => r.id,       table: 'definitions' },
+  governance:  { getId: r => r.id,       table: 'governance'  },
+  sources:     { getId: r => r.id,       table: 'sources'     },
+  users:       { getId: r => r.username, table: 'users'       },
+};
+const ALLOWED = new Set(Object.keys(TABLE_META));
 
 // ── Middleware ─────────────────────────────────────────────────────────────────
 app.use(express.json({ limit: '10mb' }));
 app.use(express.static(__dirname));
 
-// ── GET /api/data  →  load all data in one shot ───────────────────────────────
+// ── GET /api/data ──────────────────────────────────────────────────────────────
 app.get('/api/data', (req, res) => {
-  res.json({
-    definitions: readJSON(FILES.definitions, []),
-    governance:  readJSON(FILES.governance,  []),
-    sources:     readJSON(FILES.sources,     []),
-    users:       readJSON(FILES.users,       []),
-  });
+  try {
+    res.json({
+      definitions: readTable('definitions'),
+      governance:  readTable('governance'),
+      sources:     readTable('sources'),
+      users:       readTable('users'),
+    });
+  } catch (e) {
+    console.error('/api/data error:', e.message);
+    res.status(500).json({ error: e.message });
+  }
 });
 
-// ── POST /api/save/:collection  →  write a collection ─────────────────────────
-const ALLOWED = new Set(['definitions', 'governance', 'sources', 'users']);
-
+// ── POST /api/save/:collection ─────────────────────────────────────────────────
 app.post('/api/save/:collection', (req, res) => {
   const { collection } = req.params;
-  if (!ALLOWED.has(collection)) {
+  if (!ALLOWED.has(collection))
     return res.status(400).json({ error: 'Unknown collection: ' + collection });
-  }
-  if (!Array.isArray(req.body)) {
+  if (!Array.isArray(req.body))
     return res.status(400).json({ error: 'Body must be a JSON array' });
-  }
   try {
-    writeJSON(FILES[collection], req.body);
+    const { table, getId } = TABLE_META[collection];
+    replaceTable(table, req.body, getId);
     res.json({ ok: true, count: req.body.length });
   } catch (e) {
-    console.error('writeJSON error:', collection, e.message);
-    res.status(500).json({ error: 'Write failed: ' + e.message });
+    console.error('save error:', collection, e.message);
+    res.status(500).json({ error: 'Save failed: ' + e.message });
   }
 });
 
-// ── GET /api/export/:collection  →  download a JSON file directly from disk ────
+// ── GET /api/export/:collection ────────────────────────────────────────────────
 app.get('/api/export/:collection', (req, res) => {
   const { collection } = req.params;
-  if (!ALLOWED.has(collection)) {
+  if (!ALLOWED.has(collection))
     return res.status(400).json({ error: 'Unknown collection: ' + collection });
+  try {
+    const data = readTable(TABLE_META[collection].table);
+    res.setHeader('Content-Disposition', 'attachment; filename="' + collection + '.json"');
+    res.setHeader('Content-Type', 'application/json');
+    res.send(JSON.stringify(data, null, 2));
+  } catch (e) {
+    res.status(500).json({ error: e.message });
   }
-  const file = FILES[collection];
-  if (!fs.existsSync(file)) {
-    return res.status(404).json({ error: 'File not found' });
-  }
-  res.setHeader('Content-Disposition', `attachment; filename="${collection}.json"`);
-  res.setHeader('Content-Type', 'application/json');
-  res.sendFile(file);
 });
 
-// ── POST /api/import/:collection  →  replace a collection entirely ────────────
+// ── POST /api/import/:collection ───────────────────────────────────────────────
 app.post('/api/import/:collection', (req, res) => {
   const { collection } = req.params;
-  if (!ALLOWED.has(collection)) {
+  if (!ALLOWED.has(collection))
     return res.status(400).json({ error: 'Unknown collection: ' + collection });
-  }
-  if (!Array.isArray(req.body)) {
+  if (!Array.isArray(req.body))
     return res.status(400).json({ error: 'Body must be a JSON array' });
-  }
   try {
-    // Backup existing file before overwrite
-    const file = FILES[collection];
-    if (fs.existsSync(file)) {
-      fs.copyFileSync(file, file + '.bak');
-    }
-    writeJSON(file, req.body);
+    const { table, getId } = TABLE_META[collection];
+    replaceTable(table, req.body, getId);
     res.json({ ok: true, count: req.body.length });
   } catch (e) {
     console.error('import error:', collection, e.message);
@@ -117,12 +185,12 @@ app.post('/api/import/:collection', (req, res) => {
   }
 });
 
-// ── Fallback: serve index.html for any non-API route ──────────────────────────
+// ── Fallback ───────────────────────────────────────────────────────────────────
 app.get('*', (req, res) => {
   res.sendFile(path.join(__dirname, 'index.html'));
 });
 
 app.listen(PORT, () => {
-  console.log(`reg//nav running on port ${PORT}`);
-  console.log(`Data directory: ${DATA_DIR}`);
+  console.log('reg//nav running on port ' + PORT);
+  console.log('Database: ' + DB_PATH);
 });

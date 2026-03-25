@@ -547,7 +547,7 @@ function renderTermDetail(id){
       const safeId=id.replace(/[^a-z0-9]/gi,'-');
       return`<div class="also-alt" id="also-alt-${safeId}-${i}">
         <div class="also-alt-hd" onclick="toggleAlsoAlt('${id.replace(/'/g,"\\'")}',${i})">
-          <span class="src-badge ${altSc}" style="font-size:10px">${alt.source}</span>
+          <span class="src-badge ${altSc} alt-src-nav" data-altsrc="${escHtml(alt.source)}" style="font-size:10px;cursor:pointer" title="View governance">${escHtml(alt.source)} ↗</span>
           <span class="also-sec">${alt.section}</span>
           ${altBadge}
           <span class="also-chev">▶</span>
@@ -564,10 +564,10 @@ function renderTermDetail(id){
     ? `<div style="font-size:11px;font-family:var(--mono);color:var(--text3);margin-top:4px">Also known as: ${d.aliases.map(a=>`<span style="background:var(--surface2);border:1px solid var(--border);border-radius:var(--r);padding:1px 7px;margin-right:4px;display:inline-block">${escHtml(a)}</span>`).join('')}</div>`
     : '';
   // Look up source URL from _sources
-  const srcDoc = (_sources||[]).find(s => s.name === d.source);
-  const srcUrl = srcDoc && srcDoc.url ? srcDoc.url : null;
-  const srcBadge = srcUrl
-    ? `<a href="${escHtml(srcUrl)}" target="_blank" rel="noopener" class="src-badge ${sc}" style="text-decoration:none;cursor:pointer" title="Open source document">${escHtml(d.source)} ↗</a>`
+  // Find matching governance section by source name
+  const srcGovSec = loadCustomSections().find(function(s){ return s.title === d.source; });
+  const srcBadge = srcGovSec
+    ? `<span class="src-badge ${sc}" style="cursor:pointer" onclick="navToContent('${srcGovSec.id.replace(/'/g,"\'")}','${srcGovSec.title.replace(/'/g,"\'")}',false)" title="View governance: ${escHtml(srcGovSec.title)}">${escHtml(d.source)} ↗</span>`
     : `<span class="src-badge ${sc}">${escHtml(d.source)}</span>`;
   panel.innerHTML=`<div class="term-detail">${chain}<div class="tdh"><div><div class="tdterm">${d.term}</div>${aliasHtml}</div><div style="display:flex;flex-direction:column;align-items:flex-end;gap:4px">${srcBadge}<div class="tdsec">${escHtml(d.section||'')}</div></div></div><div style="margin:6px 0 10px">${authBadge}</div><div class="tddef">${renderDefText(d.rawDef)}${alsoHtml}</div>`;
 }
@@ -1028,6 +1028,14 @@ document.addEventListener('click', function(e){
   if(save){ csSave(save.dataset.sec); return; }
   const discard = e.target.closest('.cs-discard-gov');
   if(discard){ csDiscardSection(discard.dataset.sec); return; }
+  const altSrc = e.target.closest('.alt-src-nav');
+  if(altSrc){
+    e.stopPropagation();
+    const srcName = altSrc.dataset.altsrc;
+    const govSec = loadCustomSections().find(function(s){ return s.title === srcName; });
+    if(govSec){ navToContent(govSec.id, govSec.title, false); }
+    return;
+  }
 });
 
 

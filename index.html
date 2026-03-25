@@ -640,18 +640,112 @@ document.getElementById('saveBtn').addEventListener('click', async () => {
   toast(`"${term}" saved`);
 });
 
+// ── Export: download a collection directly from /data/ on the server ──
 function exportJSON(){
-  const b=new Blob([JSON.stringify(DB,null,2)],{type:'application/json'});
-  const a=document.createElement('a');a.href=URL.createObjectURL(b);a.download='reg-nav-terms.json';a.click();
-  toast('Exported reg-nav-terms.json');
+  openDataModal('export');
 }
-document.addEventListener('dragover',e=>e.preventDefault());
-document.addEventListener('drop',e=>{
-  e.preventDefault();const f=e.dataTransfer.files[0];if(!f)return;
-  const r=new FileReader();
-  r.onload=ev=>{try{const data=JSON.parse(ev.target.result);if(!Array.isArray(data))throw new Error();let added=0;data.filter(d=>d.id&&d.term&&d.rawDef).forEach(entry=>{if(!DB.find(d=>d.id===entry.id)){DB.push(entry);added++;}});saveDB();renderFilters();switchGuide(curGuide);toast('Imported '+added+' new terms');}catch(e){toast('Import failed');}};
-  r.readAsText(f);
-});
+
+// ── Import: upload a JSON file and replace a collection on the server ──
+function importJSON(){
+  openDataModal('import');
+}
+
+// ── Data modal (export + import) ──
+function openDataModal(mode){
+  let existing = document.getElementById('dataModal');
+  if(existing) existing.remove();
+
+  const COLLECTIONS = [
+    { key:'definitions', label:'Definitions',  desc:'All terms and definitions' },
+    { key:'governance',  label:'Governance',   desc:'All governance sections' },
+    { key:'sources',     label:'Sources',      desc:'Source document metadata' },
+    { key:'users',       label:'Users',        desc:'Admin user accounts' },
+  ];
+
+  const isExport = mode === 'export';
+  const title = isExport ? '↓ Export JSON' : '↑ Import JSON';
+
+  const collectionRows = COLLECTIONS.map(c => `
+    <div style="display:flex;align-items:center;justify-content:space-between;padding:10px 14px;border-bottom:1px solid var(--border)">
+      <div>
+        <div style="font-size:12px;font-weight:500;color:var(--text)">${c.label}</div>
+        <div style="font-size:11px;font-family:var(--mono);color:var(--text3)">${c.desc}</div>
+      </div>
+      ${isExport
+        ? `<a href="/api/export/${c.key}" download="${c.key}.json" class="btn btn-sm" style="text-decoration:none">↓ Download</a>`
+        : `<button class="btn btn-sm" onclick="triggerImport('${c.key}')">↑ Upload</button>`
+      }
+    </div>`).join('');
+
+  const html = `
+    <div id="dataModal" style="position:fixed;inset:0;z-index:400;background:rgba(0,0,0,.4);display:flex;align-items:center;justify-content:center">
+      <div style="background:var(--surface);border:1px solid var(--border2);border-radius:10px;width:480px;max-width:92vw;box-shadow:0 20px 60px rgba(0,0,0,.3);overflow:hidden">
+        <div style="display:flex;align-items:center;justify-content:space-between;padding:16px 20px;border-bottom:1px solid var(--border)">
+          <div style="font-size:15px;font-weight:600;color:var(--text)">${title}</div>
+          <button onclick="document.getElementById('dataModal').remove()" style="background:none;border:none;cursor:pointer;color:var(--text3);font-size:18px;padding:0 4px">✕</button>
+        </div>
+        ${isExport
+          ? `<div style="padding:10px 14px;font-size:11px;font-family:var(--mono);color:var(--text3);background:var(--surface2);border-bottom:1px solid var(--border)">
+               Downloads the live file from the server's /data/ directory
+             </div>`
+          : `<div style="padding:10px 14px;font-size:11px;font-family:var(--mono);color:var(--text3);background:var(--surface2);border-bottom:1px solid var(--border)">
+               ⚠ Replaces the entire collection. A backup (.bak) is created automatically.
+             </div>`
+        }
+        ${collectionRows}
+        <div style="padding:14px 20px;border-top:1px solid var(--border);text-align:right">
+          <button class="btn" onclick="document.getElementById('dataModal').remove()">Close</button>
+        </div>
+      </div>
+    </div>`;
+
+  document.body.insertAdjacentHTML('beforeend', html);
+
+  // Hidden file input for import
+  if(!isExport){
+    let fi = document.getElementById('importFileInput');
+    if(!fi){
+      fi = document.createElement('input');
+      fi.type = 'file'; fi.id = 'importFileInput'; fi.accept = '.json';
+      fi.style.display = 'none';
+      document.body.appendChild(fi);
+    }
+    fi.onchange = null; // reset
+  }
+}
+
+let _importTarget = null;
+function triggerImport(collection){
+  _importTarget = collection;
+  const fi = document.getElementById('importFileInput') || (() => {
+    const el = document.createElement('input');
+    el.type='file'; el.id='importFileInput'; el.accept='.json'; el.style.display='none';
+    document.body.appendChild(el); return el;
+  })();
+  fi.value = '';
+  fi.onchange = async function(){
+    const file = fi.files[0];
+    if(!file) return;
+    try {
+      const text = await file.text();
+      const data = JSON.parse(text);
+      if(!Array.isArray(data)) throw new Error('File must contain a JSON array');
+      const r = await fetch('/api/import/' + _importTarget, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data)
+      });
+      const result = await r.json();
+      if(!r.ok) throw new Error(result.error || 'Import failed');
+      document.getElementById('dataModal')?.remove();
+      toast('Imported ' + result.count + ' ' + _importTarget + ' — reloading...');
+      setTimeout(() => loadData(), 1200);
+    } catch(e) {
+      toast('Import failed: ' + e.message);
+    }
+  };
+  fi.click();
+}
 
 const SESSION_KEY = 'regnavSession_v1';
 
@@ -2116,6 +2210,7 @@ function rebuildNavTabs(){
     </div>
     <div style="flex:1"></div>
     <span id="adminSaveStatus" style="font-size:11px;font-family:var(--mono);color:var(--text3)"></span>
+    <button class="btn" onclick="importJSON()">↑ Import</button>
     <button class="btn" onclick="exportJSON()">↓ Export</button>
     <button class="btn btn-accent" onclick="adminSaveAll()">💾 Save all changes</button>
     <button class="btn" onclick="closeAdmin()">✕ Close</button>

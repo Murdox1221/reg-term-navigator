@@ -79,6 +79,44 @@ app.post('/api/save/:collection', (req, res) => {
   }
 });
 
+// ── GET /api/export/:collection  →  download a JSON file directly from disk ────
+app.get('/api/export/:collection', (req, res) => {
+  const { collection } = req.params;
+  if (!ALLOWED.has(collection)) {
+    return res.status(400).json({ error: 'Unknown collection: ' + collection });
+  }
+  const file = FILES[collection];
+  if (!fs.existsSync(file)) {
+    return res.status(404).json({ error: 'File not found' });
+  }
+  res.setHeader('Content-Disposition', `attachment; filename="${collection}.json"`);
+  res.setHeader('Content-Type', 'application/json');
+  res.sendFile(file);
+});
+
+// ── POST /api/import/:collection  →  replace a collection entirely ────────────
+app.post('/api/import/:collection', (req, res) => {
+  const { collection } = req.params;
+  if (!ALLOWED.has(collection)) {
+    return res.status(400).json({ error: 'Unknown collection: ' + collection });
+  }
+  if (!Array.isArray(req.body)) {
+    return res.status(400).json({ error: 'Body must be a JSON array' });
+  }
+  try {
+    // Backup existing file before overwrite
+    const file = FILES[collection];
+    if (fs.existsSync(file)) {
+      fs.copyFileSync(file, file + '.bak');
+    }
+    writeJSON(file, req.body);
+    res.json({ ok: true, count: req.body.length });
+  } catch (e) {
+    console.error('import error:', collection, e.message);
+    res.status(500).json({ error: 'Import failed: ' + e.message });
+  }
+});
+
 // ── Fallback: serve index.html for any non-API route ──────────────────────────
 app.get('*', (req, res) => {
   res.sendFile(path.join(__dirname, 'index.html'));

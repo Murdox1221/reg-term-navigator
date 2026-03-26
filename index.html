@@ -1579,12 +1579,21 @@ function renderAdminList(){
 
   document.getElementById('adminCount').textContent = `${items.length} of ${DB.length} terms`;
 
-  document.getElementById('adminList').innerHTML = items.map(d => {
+  // Show unsaved new term at top if one is being edited
+  let newDraftRow = '';
+  if(adminEditing && adminDraft[adminEditing] && adminDraft[adminEditing]._new){
+    const nd = adminDraft[adminEditing];
+    newDraftRow = `<div class="admin-row selected new-term" onclick="adminSelectTerm('${adminEditing.replace(/'/g,"\'")}')">
+      <div class="admin-term-name">${escHtml(nd.term||'New Term…')}</div>
+      <div class="admin-term-src">unsaved</div>
+    </div>`;
+  }
+
+  document.getElementById('adminList').innerHTML = newDraftRow + items.map(d => {
     const isDirty = adminDirty.has(d.id);
-    const isNew = d._new === true;
-    const cls = 'admin-row' + (adminEditing===d.id?' selected':'') + (isNew?' new-term':isDirty?' modified':'');
+    const cls = 'admin-row' + (adminEditing===d.id?' selected':'') + (isDirty?' modified':'');
     const srcDisplay = d.source.length > 38 ? d.source.substring(0,36)+'…' : d.source;
-    return `<div class="${cls}" onclick="adminSelectTerm('${d.id.replace(/'/g,"\\'")}')">
+    return `<div class="${cls}" onclick="adminSelectTerm('${d.id.replace(/'/g,"\'")}')">
       <div class="admin-term-name">${escHtml(d.term)}</div>
       <div class="admin-term-src">${escHtml(srcDisplay)} · ${escHtml(d.section||'—')}</div>
     </div>`;
@@ -1890,19 +1899,21 @@ function adminSaveTerm(id){
   if(!draft.term || !draft.source || !draft.rawDef){
     toast('Term, source, and definition are required'); return;
   }
-  // For new terms, set id from term name
+  // For new terms, set id from term name and remove the temp placeholder from DB
   if(draft._new && draft.term){
     draft.id = draft.term;
+    // Remove the temp placeholder entry (id was the temp id e.g. "new-term-1234")
+    const tempIdx = DB.findIndex(d => d.id === id);
+    if(tempIdx > -1) DB.splice(tempIdx, 1);
   }
-  // Apply draft to DB
-  const idx = DB.findIndex(d => d.id === id);
+  // Apply draft to DB — find by new id in case it changed
+  const idx = DB.findIndex(d => d.id === draft.id);
+  const cleanDraft = {...draft};
+  delete cleanDraft._new;
   if(idx > -1){
-    DB[idx] = {...draft};
+    DB[idx] = cleanDraft;
   } else {
-    // New term — add with correct id
-    const newDraft = {...draft};
-    delete newDraft._new;
-    DB.push(newDraft);
+    DB.push(cleanDraft);
   }
   delete draft._new;
   adminDirty.delete(id);
@@ -1923,8 +1934,16 @@ function adminSaveAll(){
 }
 
 function adminDiscardTerm(id){
+  const wasNew = adminDraft[id] && adminDraft[id]._new;
   delete adminDraft[id];
   adminDirty.delete(id);
+  if(wasNew){
+    adminEditing = null;
+    renderAdminList();
+    document.getElementById('adminEditor').innerHTML =
+      '<div style="display:flex;align-items:center;justify-content:center;height:100%;color:var(--text3);font-family:var(--mono);font-size:12px">Select a term from the list to edit it</div>';
+    return;
+  }
   renderAdminList();
   renderAdminEditor(id);
   document.getElementById('adminSaveStatus').textContent = adminDirty.size > 0
@@ -1952,16 +1971,16 @@ function adminDeleteTerm(id){
 function adminNewTerm(){
   const newId = 'new-term-' + Date.now();
   const newEntry = {
-    id: newId, term: 'New Term', source: '', section: '',
+    id: newId, term: '', source: '', section: '',
     rawDef: '', authoritative: true, alsoIn: [], aliases: [], _new: true
   };
-  DB.push(newEntry);
+  // Do NOT push to DB — only lives in draft until saved
   adminDraft[newId] = JSON.parse(JSON.stringify(newEntry));
   adminDirty.add(newId);
   adminEditing = newId;
+  // Add a visual placeholder to the list only
   renderAdminList();
   renderAdminEditor(newId);
-  // Focus term field
   setTimeout(() => { const f = document.getElementById('af-term'); if(f){f.focus();f.select();} }, 50);
 }
 

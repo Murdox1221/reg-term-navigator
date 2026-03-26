@@ -18,9 +18,15 @@ const SEED_DIR = path.join(__dirname, 'data');
 if (!fs.existsSync(DATA_DIR)) fs.mkdirSync(DATA_DIR, { recursive: true });
 
 // ── Open / create database ────────────────────────────────────────────────────
-const db = new Database(DB_PATH);
-db.pragma('journal_mode = WAL');
-db.pragma('foreign_keys = ON');
+let db;
+try {
+  db = new Database(DB_PATH);
+  db.pragma('journal_mode = WAL');
+  db.pragma('foreign_keys = ON');
+} catch (e) {
+  console.error('FATAL: Failed to open database at', DB_PATH, ':', e.message);
+  process.exit(1);
+}
 
 // ── Schema ────────────────────────────────────────────────────────────────────
 db.exec(`
@@ -175,8 +181,8 @@ app.get('/api/export/:collection', (req, res) => {
 
 // ── POST /api/import/:collection?mode=replace|merge ──────────────────────────
 // replace (default): wipe and replace entire collection
-// merge (definitions): new term → insert; same term+source → overwrite; same term diff source → add as alsoIn
-// merge (governance):  new section → insert; existing section → overwrite; others preserved
+// merge (definitions): new term -> insert; same term+source -> overwrite; same term diff source -> add as alsoIn
+// merge (governance):  new section -> insert; existing section -> overwrite; others preserved
 const MERGE_SUPPORTED = new Set(['definitions', 'governance']);
 
 app.post('/api/import/:collection', (req, res) => {
@@ -190,34 +196,32 @@ app.post('/api/import/:collection', (req, res) => {
     const { table, getId } = TABLE_META[collection];
 
     if (mode === 'merge' && collection === 'definitions') {
+      // Pre-prepare all statements outside the transaction
+      const stmtFind   = db.prepare('SELECT id, data FROM definitions WHERE LOWER(id) = LOWER(?)');
+      const stmtInsert = db.prepare('INSERT OR REPLACE INTO definitions (id, data) VALUES (?, ?)');
+      const stmtUpdate = db.prepare('UPDATE definitions SET data = ? WHERE id = ?');
       const stats = { inserted: 0, updated: 0, alsoIn: 0 };
       const mergeMany = db.transaction((items) => {
         items.forEach((incoming) => {
           const termId = (incoming.term || incoming.id || '').trim();
           if (!termId) return;
-          // Find existing by term name (case-insensitive)
-          const existing = db.prepare(
-            "SELECT id, data FROM definitions WHERE LOWER(id) = LOWER(?)"
-          ).get(termId);
+          const existing = stmtFind.get(termId);
           if (!existing) {
-            // Brand new — insert
             const id = incoming.id || incoming.term;
-            const clean = {...incoming, id};
+            const clean = Object.assign({}, incoming, { id });
             delete clean._new;
-            db.prepare('INSERT OR REPLACE INTO definitions (id, data) VALUES (?, ?)').run(id, JSON.stringify(clean));
+            stmtInsert.run(id, JSON.stringify(clean));
             stats.inserted++;
           } else {
             const existingData = JSON.parse(existing.data);
             const incomingSource = (incoming.source || '').trim();
             const existingSource = (existingData.source || '').trim();
             if (!incomingSource || incomingSource === existingSource) {
-              // Same source — overwrite
-              const merged = {...existingData, ...incoming, id: existing.id};
+              const merged = Object.assign({}, existingData, incoming, { id: existing.id });
               delete merged._new;
-              db.prepare('UPDATE definitions SET data = ? WHERE id = ?').run(JSON.stringify(merged), existing.id);
+              stmtUpdate.run(JSON.stringify(merged), existing.id);
               stats.updated++;
             } else {
-              // Different source — add as alsoIn if not already present for this source
               const alsoIn = existingData.alsoIn || [];
               const alreadyThere = alsoIn.some(a => a.source === incomingSource);
               if (!alreadyThere) {
@@ -228,13 +232,12 @@ app.post('/api/import/:collection', (req, res) => {
                   authoritative: incoming.authoritative === true
                 });
                 existingData.alsoIn = alsoIn;
-                // Merge aliases without duplicating
                 if (incoming.aliases && incoming.aliases.length) {
                   const aliasSet = new Set(existingData.aliases || []);
                   incoming.aliases.forEach(a => aliasSet.add(a));
-                  existingData.aliases = [...aliasSet];
+                  existingData.aliases = Array.from(aliasSet);
                 }
-                db.prepare('UPDATE definitions SET data = ? WHERE id = ?').run(JSON.stringify(existingData), existing.id);
+                stmtUpdate.run(JSON.stringify(existingData), existing.id);
                 stats.alsoIn++;
               }
             }
@@ -243,19 +246,21 @@ app.post('/api/import/:collection', (req, res) => {
       });
       mergeMany(req.body);
       const total = db.prepare('SELECT COUNT(*) as n FROM definitions').get().n;
-      res.json({ ok: true, ...stats, total, mode: 'merge' });
+      res.json({ ok: true, inserted: stats.inserted, updated: stats.updated, alsoIn: stats.alsoIn, total, mode: 'merge' });
 
     } else if (mode === 'merge' && collection === 'governance') {
-      // Governance merge — upsert, preserve unlisted sections
-      const upsert = db.prepare('INSERT OR REPLACE INTO governance (id, position, data) VALUES (?, ?, ?)');
+      // Pre-prepare all statements outside the transaction
+      const stmtMaxPos  = db.prepare('SELECT COALESCE(MAX(position),0) as m FROM governance');
+      const stmtGetPos  = db.prepare('SELECT position FROM governance WHERE id = ?');
+      const stmtUpsert  = db.prepare('INSERT OR REPLACE INTO governance (id, position, data) VALUES (?, ?, ?)');
       const mergeGov = db.transaction((items) => {
-        const maxPos = db.prepare('SELECT COALESCE(MAX(position),0) as m FROM governance').get().m;
+        const maxPos = stmtMaxPos.get().m;
         items.forEach((item, i) => {
           const id = getId(item);
           if (!id) return;
-          const existingRow = db.prepare('SELECT position FROM governance WHERE id = ?').get(id);
+          const existingRow = stmtGetPos.get(id);
           const pos = existingRow ? existingRow.position : maxPos + i + 1;
-          upsert.run(id, pos, JSON.stringify(item));
+          stmtUpsert.run(id, pos, JSON.stringify(item));
         });
       });
       mergeGov(req.body);

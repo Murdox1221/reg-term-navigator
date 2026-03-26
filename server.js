@@ -173,29 +173,104 @@ app.get('/api/export/:collection', (req, res) => {
   }
 });
 
-// ── POST /api/import/:collection ───────────────────────────────────────────────
+// ── POST /api/import/:collection?mode=replace|merge ──────────────────────────
+// replace (default): wipe and replace entire collection
+// merge (definitions): new term → insert; same term+source → overwrite; same term diff source → add as alsoIn
+// merge (governance):  new section → insert; existing section → overwrite; others preserved
+const MERGE_SUPPORTED = new Set(['definitions', 'governance']);
+
 app.post('/api/import/:collection', (req, res) => {
   const { collection } = req.params;
+  const mode = req.query.mode === 'merge' && MERGE_SUPPORTED.has(collection) ? 'merge' : 'replace';
   if (!ALLOWED.has(collection))
     return res.status(400).json({ error: 'Unknown collection: ' + collection });
   if (!Array.isArray(req.body))
     return res.status(400).json({ error: 'Body must be a JSON array' });
   try {
     const { table, getId } = TABLE_META[collection];
-    replaceTable(table, req.body, getId);
-    res.json({ ok: true, count: req.body.length });
+
+    if (mode === 'merge' && collection === 'definitions') {
+      const stats = { inserted: 0, updated: 0, alsoIn: 0 };
+      const mergeMany = db.transaction((items) => {
+        items.forEach((incoming) => {
+          const termId = (incoming.term || incoming.id || '').trim();
+          if (!termId) return;
+          // Find existing by term name (case-insensitive)
+          const existing = db.prepare(
+            "SELECT id, data FROM definitions WHERE LOWER(id) = LOWER(?)"
+          ).get(termId);
+          if (!existing) {
+            // Brand new — insert
+            const id = incoming.id || incoming.term;
+            const clean = {...incoming, id};
+            delete clean._new;
+            db.prepare('INSERT OR REPLACE INTO definitions (id, data) VALUES (?, ?)').run(id, JSON.stringify(clean));
+            stats.inserted++;
+          } else {
+            const existingData = JSON.parse(existing.data);
+            const incomingSource = (incoming.source || '').trim();
+            const existingSource = (existingData.source || '').trim();
+            if (!incomingSource || incomingSource === existingSource) {
+              // Same source — overwrite
+              const merged = {...existingData, ...incoming, id: existing.id};
+              delete merged._new;
+              db.prepare('UPDATE definitions SET data = ? WHERE id = ?').run(JSON.stringify(merged), existing.id);
+              stats.updated++;
+            } else {
+              // Different source — add as alsoIn if not already present for this source
+              const alsoIn = existingData.alsoIn || [];
+              const alreadyThere = alsoIn.some(a => a.source === incomingSource);
+              if (!alreadyThere) {
+                alsoIn.push({
+                  source: incomingSource,
+                  section: incoming.section || '',
+                  rawDef: incoming.rawDef || '',
+                  authoritative: incoming.authoritative === true
+                });
+                existingData.alsoIn = alsoIn;
+                // Merge aliases without duplicating
+                if (incoming.aliases && incoming.aliases.length) {
+                  const aliasSet = new Set(existingData.aliases || []);
+                  incoming.aliases.forEach(a => aliasSet.add(a));
+                  existingData.aliases = [...aliasSet];
+                }
+                db.prepare('UPDATE definitions SET data = ? WHERE id = ?').run(JSON.stringify(existingData), existing.id);
+                stats.alsoIn++;
+              }
+            }
+          }
+        });
+      });
+      mergeMany(req.body);
+      const total = db.prepare('SELECT COUNT(*) as n FROM definitions').get().n;
+      res.json({ ok: true, ...stats, total, mode: 'merge' });
+
+    } else if (mode === 'merge' && collection === 'governance') {
+      // Governance merge — upsert, preserve unlisted sections
+      const upsert = db.prepare('INSERT OR REPLACE INTO governance (id, position, data) VALUES (?, ?, ?)');
+      const mergeGov = db.transaction((items) => {
+        const maxPos = db.prepare('SELECT COALESCE(MAX(position),0) as m FROM governance').get().m;
+        items.forEach((item, i) => {
+          const id = getId(item);
+          if (!id) return;
+          const existingRow = db.prepare('SELECT position FROM governance WHERE id = ?').get(id);
+          const pos = existingRow ? existingRow.position : maxPos + i + 1;
+          upsert.run(id, pos, JSON.stringify(item));
+        });
+      });
+      mergeGov(req.body);
+      const total = db.prepare('SELECT COUNT(*) as n FROM governance').get().n;
+      res.json({ ok: true, count: req.body.length, total, mode: 'merge' });
+
+    } else {
+      replaceTable(table, req.body, getId);
+      res.json({ ok: true, count: req.body.length, mode: 'replace' });
+    }
   } catch (e) {
     console.error('import error:', collection, e.message);
     res.status(500).json({ error: 'Import failed: ' + e.message });
   }
 });
 
-// ── Fallback ───────────────────────────────────────────────────────────────────
-app.get('*', (req, res) => {
-  res.sendFile(path.join(__dirname, 'index.html'));
-});
 
-app.listen(PORT, () => {
-  console.log('reg//nav running on port ' + PORT);
-  console.log('Database: ' + DB_PATH);
-});
+// ── Fallback

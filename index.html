@@ -1128,6 +1128,8 @@ function openDataModal(mode){
   let existing = document.getElementById('dataModal');
   if(existing) existing.remove();
 
+  const MERGE_SUPPORTED = new Set(['definitions','governance']);
+
   const COLLECTIONS = [
     { key:'definitions', label:'Definitions',  desc:'All terms and definitions' },
     { key:'governance',  label:'Governance',   desc:'All governance sections' },
@@ -1138,32 +1140,46 @@ function openDataModal(mode){
   const isExport = mode === 'export';
   const title = isExport ? '↓ Export JSON' : '↑ Import JSON';
 
-  const collectionRows = COLLECTIONS.map(c => `
-    <div style="display:flex;align-items:center;justify-content:space-between;padding:10px 14px;border-bottom:1px solid var(--border)">
+  const collectionRows = COLLECTIONS.map(c => {
+    if(isExport){
+      return `<div style="display:flex;align-items:center;justify-content:space-between;padding:10px 14px;border-bottom:1px solid var(--border)">
+        <div>
+          <div style="font-size:12px;font-weight:500;color:var(--text)">${c.label}</div>
+          <div style="font-size:11px;font-family:var(--mono);color:var(--text3)">${c.desc}</div>
+        </div>
+        <a href="/api/export/${c.key}" download="${c.key}.json" class="btn btn-sm" style="text-decoration:none">↓ Download</a>
+      </div>`;
+    }
+    const canMerge = MERGE_SUPPORTED.has(c.key);
+    const modeToggle = canMerge
+      ? `<div style="display:flex;align-items:center;gap:6px;margin-top:4px">
+           <label style="font-size:10px;font-family:var(--mono);color:var(--text3)">Mode:</label>
+           <select id="import-mode-${c.key}" style="font-size:10px;font-family:var(--mono);padding:2px 6px;border:1px solid var(--border);border-radius:var(--r);background:var(--surface2);color:var(--text)">
+             <option value="merge">Merge — add new, update same source, alsoIn for diff source</option>
+             <option value="replace">Replace — full replacement (deletes unlisted entries)</option>
+           </select>
+         </div>`
+      : `<div style="font-size:10px;font-family:var(--mono);color:var(--text3);margin-top:2px">Replace only</div>`;
+    return `<div style="display:flex;align-items:center;justify-content:space-between;padding:10px 14px;border-bottom:1px solid var(--border)">
       <div>
         <div style="font-size:12px;font-weight:500;color:var(--text)">${c.label}</div>
         <div style="font-size:11px;font-family:var(--mono);color:var(--text3)">${c.desc}</div>
+        ${modeToggle}
       </div>
-      ${isExport
-        ? `<a href="/api/export/${c.key}" download="${c.key}.json" class="btn btn-sm" style="text-decoration:none">↓ Download</a>`
-        : `<button class="btn btn-sm" onclick="triggerImport('${c.key}')">↑ Upload</button>`
-      }
-    </div>`).join('');
+      <button class="btn btn-sm" style="margin-left:12px;flex-shrink:0" onclick="triggerImport('${c.key}')">↑ Upload</button>
+    </div>`;
+  }).join('');
 
   const html = `
     <div id="dataModal" style="position:fixed;inset:0;z-index:400;background:rgba(0,0,0,.4);display:flex;align-items:center;justify-content:center">
-      <div style="background:var(--surface);border:1px solid var(--border2);border-radius:10px;width:480px;max-width:92vw;box-shadow:0 20px 60px rgba(0,0,0,.3);overflow:hidden">
+      <div style="background:var(--surface);border:1px solid var(--border2);border-radius:10px;width:500px;max-width:92vw;box-shadow:0 20px 60px rgba(0,0,0,.3);overflow:hidden">
         <div style="display:flex;align-items:center;justify-content:space-between;padding:16px 20px;border-bottom:1px solid var(--border)">
           <div style="font-size:15px;font-weight:600;color:var(--text)">${title}</div>
           <button onclick="document.getElementById('dataModal').remove()" style="background:none;border:none;cursor:pointer;color:var(--text3);font-size:18px;padding:0 4px">✕</button>
         </div>
         ${isExport
-          ? `<div style="padding:10px 14px;font-size:11px;font-family:var(--mono);color:var(--text3);background:var(--surface2);border-bottom:1px solid var(--border)">
-               Downloads the live data from the database
-             </div>`
-          : `<div style="padding:10px 14px;font-size:11px;font-family:var(--mono);color:var(--text3);background:var(--surface2);border-bottom:1px solid var(--border)">
-               ⚠ Replaces the entire collection. A backup (.bak) is created automatically.
-             </div>`
+          ? `<div style="padding:10px 14px;font-size:11px;font-family:var(--mono);color:var(--text3);background:var(--surface2);border-bottom:1px solid var(--border)">Downloads the live data from the database</div>`
+          : `<div style="padding:10px 14px;font-size:11px;font-family:var(--mono);color:var(--text3);background:var(--surface2);border-bottom:1px solid var(--border)">Merge adds/updates entries without removing existing ones. Replace wipes the entire collection first.</div>`
         }
         ${collectionRows}
         <div style="padding:14px 20px;border-top:1px solid var(--border);text-align:right">
@@ -1176,6 +1192,8 @@ function openDataModal(mode){
 }
 
 function triggerImport(collection){
+  const modeEl = document.getElementById('import-mode-' + collection);
+  const importMode = modeEl ? modeEl.value : 'replace';
   let fi = document.getElementById('importFileInput');
   if(!fi){
     fi = document.createElement('input');
@@ -1192,7 +1210,8 @@ function triggerImport(collection){
       const text = await file.text();
       const data = JSON.parse(text);
       if(!Array.isArray(data)) throw new Error('File must contain a JSON array');
-      const r = await fetch('/api/import/' + collection, {
+      const url = '/api/import/' + collection + (importMode === 'merge' ? '?mode=merge' : '');
+      const r = await fetch(url, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(data)
@@ -1200,7 +1219,19 @@ function triggerImport(collection){
       const result = await r.json();
       if(!r.ok) throw new Error(result.error || 'Import failed');
       document.getElementById('dataModal')?.remove();
-      toast('Imported ' + result.count + ' ' + collection + ' — reloading...');
+      let msg;
+      if(importMode === 'merge' && collection === 'definitions'){
+        msg = 'Merge complete — '
+          + (result.inserted||0) + ' new, '
+          + (result.updated||0) + ' updated, '
+          + (result.alsoIn||0) + ' added as alsoIn'
+          + ' (' + (result.total||'?') + ' total) — reloading...';
+      } else if(importMode === 'merge'){
+        msg = 'Merged ' + result.count + ' entries (' + (result.total||'?') + ' total in ' + collection + ') — reloading...';
+      } else {
+        msg = 'Imported ' + result.count + ' ' + collection + ' — reloading...';
+      }
+      toast(msg);
       setTimeout(() => loadData(), 1200);
     } catch(e) {
       toast('Import failed: ' + e.message);

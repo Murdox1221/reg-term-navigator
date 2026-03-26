@@ -826,20 +826,33 @@ function setFilter(f){
   if(sel)sel.value=f||'';
   renderTermListView();
 }
+function termMatchesFilter(d, filter){
+  if(!filter) return true;
+  if(d.source === filter) return true;
+  if(d.alsoIn && d.alsoIn.some(function(alt){ return alt.source === filter; })) return true;
+  return false;
+}
+
 function renderTermListView(){
   const items=DB.filter(d=>{
     const q=defQ.toLowerCase();
     const mq=!q||d.term.toLowerCase().includes(q)||d.rawDef.toLowerCase().includes(q)||d.source.toLowerCase().includes(q);
-    const mf=!activeFilter||d.source===activeFilter;return mq&&mf;
+    const mf=termMatchesFilter(d, activeFilter);
+    return mq&&mf;
   });
   const cur=trail.length?trail[trail.length-1]:null;
   const p=document.getElementById('defContent');
   if(!items.length){p.innerHTML='<div class="def-empty"><p>No matches found</p></div>';return;}
   p.innerHTML=items.map(d=>{
-    const sc=srcClass(d.source);
-    return`<div class="tli${d.id===cur?' active':''}" onclick="navTo('${d.id.replace(/'/g,"\\'")}',true)">
-      <div class="tli-main"><div class="tli-n">${d.term}${visited.has(d.id)&&d.id!==cur?' <span class="tli-v">visited</span>':''}</div><div class="tli-s">${d.source}</div></div>
-      <span class="src-badge ${sc}" style="margin-top:2px">${escHtml(((_sources||[]).find(s=>s.name===d.source)||{}).abbrev||d.source||'')}</span>
+    const authAlsoIdx=(d.alsoIn||[]).findIndex(function(alt){return alt.authoritative===true;});
+    const dispSource=(authAlsoIdx!==-1&&d.authoritative===false)?d.alsoIn[authAlsoIdx].source:d.source;
+    const srcMeta=(_sources||[]).find(function(s){return s.name===dispSource;});
+    const srcLabel=(srcMeta&&srcMeta.abbrev)?srcMeta.abbrev:dispSource;
+    const srcColor=srcMeta&&srcMeta.color?srcMeta.color:null;
+    const badgeStyle=srcColor?'margin-top:2px;background:'+srcColor+'18;color:'+srcColor+';border-color:'+srcColor+'55;':'margin-top:2px;';
+    return`<div class="tli${d.id===cur?' active':''}" onclick="navTo('${d.id.replace(/'/g,"\'")}',true)">
+      <div class="tli-main"><div class="tli-n">${d.term}${visited.has(d.id)&&d.id!==cur?' <span class="tli-v">visited</span>':''}</div><div class="tli-s">${escHtml(dispSource)}</div></div>
+      <span class="src-badge" style="${badgeStyle}">${escHtml(srcLabel)}</span>
     </div>`;
   }).join('');
 }

@@ -2063,17 +2063,6 @@ let govEditingSource = null; // the source name currently selected
 
 function renderGovSourceList(){
   govDocs = loadGovDocs();
-  // Merge: add any new sources from DB not yet in govDocs
-  const existingIds = new Set(govDocs.map(g => g.id));
-  DB.forEach(d => {
-    if(!existingIds.has(d.source)){
-      govDocs.push({
-        id: d.source, name: d.source, abbrev: deriveAbbrev(d.source),
-        color: '#4b5563', description: '', url: deriveUrl(d.source),
-      });
-      existingIds.add(d.source);
-    }
-  });
 
   const list = document.getElementById('govSourceList');
   if(!list) return;

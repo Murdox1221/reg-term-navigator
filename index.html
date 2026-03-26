@@ -170,6 +170,21 @@ body{font-family:var(--sans);background:var(--bg);color:var(--text);min-height:1
 
 /* Also defined in */
 .also-defined{margin-top:14px;border-top:1px solid var(--border);padding-top:12px}
+.ref-in{margin-top:14px;border-top:1px solid var(--border);padding-top:12px}
+.ref-in-hd{display:flex;align-items:center;justify-content:space-between;cursor:pointer;user-select:none;padding:4px 0}
+.ref-in-label{font-size:11px;font-weight:600;font-family:var(--mono);text-transform:uppercase;letter-spacing:.06em;color:var(--text3)}
+.ref-in-count{font-size:10px;font-family:var(--mono);color:var(--text3);background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:1px 7px}
+.ref-in-chev{font-size:10px;color:var(--text3);transition:transform .15s}
+.ref-in.open .ref-in-chev{transform:rotate(90deg)}
+.ref-in-body{display:none;margin-top:8px;display:flex;flex-direction:column;gap:4px}
+.ref-in.open .ref-in-body{display:flex}
+.ref-in-body{display:none}
+.ref-chip{display:inline-flex;align-items:center;gap:6px;padding:4px 10px;border-radius:var(--r);border:1px solid var(--border2);background:var(--surface2);cursor:pointer;font-size:11px;font-family:var(--mono);color:var(--text2);transition:all .12s;white-space:nowrap}
+.ref-chip:hover{background:var(--accent-bg);color:var(--accent);border-color:var(--accent-mid)}
+.ref-chip-src{font-weight:600}
+.ref-chip-sec{opacity:.7}
+@keyframes refHighlight{0%{background:var(--accent-bg);outline:2px solid var(--accent-mid)}100%{background:transparent;outline:2px solid transparent}}
+.ref-highlight{animation:refHighlight 2s ease-out forwards}
 .also-label{font-size:10px;font-family:var(--mono);text-transform:uppercase;letter-spacing:.07em;color:var(--text3);margin-bottom:8px}
 .also-alt{border:1px solid var(--border);border-radius:var(--r);overflow:hidden;margin-bottom:6px}
 .also-alt-hd{display:flex;align-items:center;gap:8px;padding:7px 10px;cursor:pointer;background:var(--surface2);user-select:none}
@@ -730,6 +745,106 @@ function renderTrail(){
   if(btn){btn.style.opacity='1';btn.style.pointerEvents='auto';}
 }
 
+// ── Scan governance sections for references to a term ────────────────────────
+// Returns [{docId, docTitle, docAbbrev, secId, secTitle, path}]
+function findReferences(termId) {
+  const d = DB.find(function(x){ return x.id === termId; });
+  if (!d) return [];
+
+  // Build list of names to match: term, id, all aliases
+  const names = [d.term, d.id].concat(d.aliases || [])
+    .map(function(n){ return n.toLowerCase().trim(); })
+    .filter(function(n, i, a){ return n && a.indexOf(n) === i; });
+
+  const results = [];
+  const sections = loadCustomSections();
+
+  function scanNode(node, path, docId, docTitle, docAbbrev) {
+    const body = node.body || '';
+    if (body) {
+      // Find all [[...]] tokens in the body
+      const matches = body.match(/\[\[([^\]]+)\]\]/g) || [];
+      for (const m of matches) {
+        let ph = m.slice(2, -2);
+        // Decode HTML entities
+        ph = ph.replace(/&gt;/g,'>')
+               .replace(/&lt;/g,'<')
+               .replace(/&amp;/g,'&')
+               .replace(/&quot;/g,'"')
+               .replace(/&#39;/g,"'");
+        if (ph.startsWith('>')) continue; // content link, not definition
+        // Strip pipe display text
+        const pipeIdx = ph.indexOf('|');
+        const target = pipeIdx !== -1 ? ph.slice(0, pipeIdx).trim() : ph.trim();
+        const targetLow = target.toLowerCase();
+        if (names.some(function(n){ return n === targetLow; })) {
+          results.push({
+            docId: docId,
+            docTitle: docTitle,
+            docAbbrev: docAbbrev,
+            secId: node.id || '',
+            secTitle: node.title || '',
+            path: path.slice()
+          });
+          break; // only record once per section even if multiple refs
+        }
+      }
+    }
+    (node.children || []).forEach(function(child, ci) {
+      scanNode(child, path.concat(ci), docId, docTitle, docAbbrev);
+    });
+  }
+
+  sections.forEach(function(sec) {
+    const srcMeta = (_sources || []).find(function(s){ return s.name === sec.title; });
+    const abbrev = srcMeta && srcMeta.abbrev ? srcMeta.abbrev : sec.title;
+    (sec.sections || []).forEach(function(node, si) {
+      scanNode(node, [si], sec.id, sec.title, abbrev);
+    });
+  });
+
+  return results;
+}
+
+// Navigate to a governance section and highlight a specific sub-section
+function navToSection(docId, docTitle, secId) {
+  navToContent(docId, docTitle, false);
+  if (!secId) return;
+  // After the guide renders, find and highlight the section
+  setTimeout(function() {
+    // Find element by data-sec and data-path, or scan for matching id text
+    const guide = document.getElementById('guideContent');
+    if (!guide) return;
+    // Find all .pid elements matching the secId
+    const pids = guide.querySelectorAll('.pid');
+    let target = null;
+    pids.forEach(function(el) {
+      if (el.textContent.trim() === secId) target = el;
+    });
+    if (!target) {
+      // Try section header abbreviation spans
+      const abbrs = guide.querySelectorAll('.dabbr');
+      abbrs.forEach(function(el) {
+        if (el.textContent.trim() === secId) target = el;
+      });
+    }
+    if (target) {
+      // Expand parent collapsibles
+      let parent = target.closest('.dg');
+      while (parent) {
+        const hd = parent.querySelector('.dh');
+        if (hd && !hd.classList.contains('open')) hd.classList.add('open');
+        parent = parent.parentElement && parent.parentElement.closest('.dg');
+      }
+      target.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      const highlightEl = target.closest('.pi') || target.closest('.dg') || target;
+      highlightEl.classList.remove('ref-highlight');
+      void highlightEl.offsetWidth; // force reflow
+      highlightEl.classList.add('ref-highlight');
+    }
+  }, 150);
+}
+
 function renderTermDetail(id){
   const d=DB.find(x=>x.id===id);
   const panel=document.getElementById('defContent');
@@ -801,7 +916,30 @@ function renderTermDetail(id){
     ? `<div style="font-size:11px;font-family:var(--mono);color:var(--text3);margin-top:4px">Also known as: ${d.aliases.map(a=>`<span style="background:var(--surface2);border:1px solid var(--border);border-radius:var(--r);padding:1px 7px;margin-right:4px;display:inline-block">${escHtml(a)}</span>`).join('')}</div>`
     : '';
   const srcBadge = makeSrcBadge(displayEntry.source);
-  panel.innerHTML=`<div class="term-detail"><div class="tdh"><div><div class="tdterm">${d.term}</div>${aliasHtml}</div><div style="display:flex;flex-direction:column;align-items:flex-end;gap:4px">${srcBadge}<div class="tdsec">${escHtml(displayEntry.section||'')}</div></div></div><div style="margin:6px 0 10px">${authBadge}</div><div class="tddef">${renderDefText(displayEntry.rawDef)}${alsoHtml}</div>`;
+
+  // Build "Referenced in" panel — scan on demand
+  const refs = findReferences(id);
+  let refHtml = '';
+  if (refs.length) {
+    const chips = refs.map(function(r) {
+      const label = (r.secId ? r.docAbbrev + ' ' + r.secId : r.docAbbrev) + (r.secTitle ? ' — ' + r.secTitle : '');
+      return '<span class="ref-chip" onclick="navToSection(&quot;' + r.docId.replace(/&/g,'&amp;').replace(/"/g,'&quot;') + '&quot;,&quot;' + r.docTitle.replace(/&/g,'&amp;').replace(/"/g,'&quot;') + '&quot;,&quot;' + (r.secId||'').replace(/&/g,'&amp;').replace(/"/g,'&quot;') + '&quot;)" title="' + escHtml(r.docTitle) + (r.secTitle ? ' \xb7 ' + escHtml(r.secTitle) : '') + '">'
+        + '<span class="ref-chip-src">' + escHtml(r.docAbbrev) + '</span>'
+        + (r.secId ? '<span class="ref-chip-sec">' + escHtml(r.secId) + '</span>' : '')
+        + '</span>';
+    }).join('');
+    refHtml = '<div class="ref-in" id="ref-in-' + id.replace(/[^a-z0-9]/gi,'-') + '">'
+      + '<div class="ref-in-hd" onclick="this.parentElement.classList.toggle(&quot;open&quot;)">'
+      + '<span class="ref-in-label">Referenced in</span>'
+      + '<div style="display:flex;align-items:center;gap:8px">'
+      + '<span class="ref-in-count">' + refs.length + ' location' + (refs.length !== 1 ? 's' : '') + '</span>'
+      + '<span class="ref-in-chev">▶</span>'
+      + '</div></div>'
+      + '<div class="ref-in-body" style="flex-wrap:wrap;gap:6px">' + chips + '</div>'
+      + '</div>';
+  }
+
+  panel.innerHTML=`<div class="term-detail"><div class="tdh"><div><div class="tdterm">${d.term}</div>${aliasHtml}</div><div style="display:flex;flex-direction:column;align-items:flex-end;gap:4px">${srcBadge}<div class="tdsec">${escHtml(displayEntry.section||'')}</div></div></div><div style="margin:6px 0 10px">${authBadge}</div><div class="tddef">${renderDefText(displayEntry.rawDef)}${alsoHtml}${refHtml}</div>`;
 }
 
 
@@ -2056,7 +2194,10 @@ function initGovDocs(){
 }
 
 function getTermCountForSource(source){
-  return DB.filter(d => d.source === source).length;
+  return DB.filter(d =>
+    d.source === source ||
+    (d.alsoIn && d.alsoIn.some(function(alt){ return alt.source === source; }))
+  ).length;
 }
 
 let govEditingSource = null; // the source name currently selected

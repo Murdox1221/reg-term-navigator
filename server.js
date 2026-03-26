@@ -51,6 +51,7 @@ try {
 }
 
 // ── Schema ────────────────────────────────────────────────────────────────────
+console.log('creating schema...');
 db.exec(`
   CREATE TABLE IF NOT EXISTS definitions (
     id       TEXT PRIMARY KEY,
@@ -107,10 +108,12 @@ function seedTable(table, jsonFile, getId) {
   }
 }
 
+console.log('schema created OK');
 seedTable('definitions', 'definitions.json', r => r.id);
 seedTable('governance',  'governance.json',  r => r.id);
 seedTable('sources',     'sources.json',     r => r.id);
 seedTable('users',       'users.json',       r => r.username);
+console.log('seeding done');
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
 function readTable(table) {
@@ -301,3 +304,11 @@ app.post('/api/import/:collection', (req, res) => {
 
 
 // ── Fallback
+app.get('*', (req, res) => {
+  res.sendFile(path.join(__dirname, 'index.html'));
+});
+
+app.listen(PORT, () => {
+  console.log('reg//nav running on port ' + PORT);
+  console.log('Database: ' + DB_PATH);
+});

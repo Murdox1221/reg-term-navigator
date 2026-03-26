@@ -12,10 +12,15 @@ process.on('unhandledRejection', (reason) => {
 });
 
 console.log('server.js starting...');
+console.log('node version:', process.version);
+console.log('cwd:', process.cwd());
+console.log('__dirname:', __dirname);
 const express = require('express');
+console.log('express loaded');
 const fs      = require('fs');
 const path    = require('path');
 const Database = require('better-sqlite3');
+console.log('all modules loaded');
 
 const app     = express();
 const PORT    = process.env.PORT || 3000;
@@ -30,13 +35,18 @@ const SEED_DIR = path.join(__dirname, 'data');
 if (!fs.existsSync(DATA_DIR)) fs.mkdirSync(DATA_DIR, { recursive: true });
 
 // ── Open / create database ────────────────────────────────────────────────────
+console.log('DATA_DIR:', DATA_DIR);
+console.log('DB_PATH:', DB_PATH);
+console.log('DATA_DIR exists:', require('fs').existsSync(DATA_DIR));
 let db;
 try {
   db = new Database(DB_PATH);
   db.pragma('journal_mode = WAL');
   db.pragma('foreign_keys = ON');
+  console.log('database opened OK');
 } catch (e) {
   console.error('FATAL: Failed to open database at', DB_PATH, ':', e.message);
+  console.error(e.stack);
   process.exit(1);
 }
 

@@ -1155,8 +1155,8 @@ function openDataModal(mode){
       ? `<div style="display:flex;align-items:center;gap:6px;margin-top:4px">
            <label style="font-size:10px;font-family:var(--mono);color:var(--text3)">Mode:</label>
            <select id="import-mode-${c.key}" style="font-size:10px;font-family:var(--mono);padding:2px 6px;border:1px solid var(--border);border-radius:var(--r);background:var(--surface2);color:var(--text)">
-             <option value="merge">Merge — add new, update same source, alsoIn for diff source</option>
-             <option value="replace">Replace — full replacement (deletes unlisted entries)</option>
+             <option value="merge">Merge Changes</option>
+             <option value="replace">Replace All</option>
            </select>
          </div>`
       : `<div style="font-size:10px;font-family:var(--mono);color:var(--text3);margin-top:2px">Replace only</div>`;

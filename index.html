@@ -2090,6 +2090,13 @@ function renderGovSourceList(){
       <div class="gov-src-meta">${count} term${count!==1?'s':''} · ${doc.abbrev||'—'}</div>
     </div>`;
   }).join('');
+
+  // Show unsaved new source at top if one is being edited
+  if(govEditingSource && govDraft[govEditingSource] && govDraft[govEditingSource]._new){
+    const nd = govDraft[govEditingSource];
+    const newRow = '<div class="gov-src-row selected new-term" onclick="govSelectSource(\'' + govEditingSource.replace(/\'/g,"\\'") + '\')"><div style="display:flex;align-items:center;gap:8px"><div class="gov-color-swatch" style="background:' + (nd.color||'#4b5563') + '"></div><div class="gov-src-name">' + escHtml(nd.name||'New Source…') + '</div></div><div class="gov-src-meta">unsaved</div></div>';
+    list.innerHTML = newRow + list.innerHTML;
+  }
 }
 
 function govSelectSource(id){
@@ -2228,10 +2235,21 @@ function updateGovPreview(doc){
 function govSaveSource(id){
   const draft = govDraft[id];
   if(!draft) return;
-  const idx = govDocs.findIndex(g => g.id === id);
-  if(idx > -1) govDocs[idx] = {...draft};
-  else govDocs.push({...draft});
+  if(!draft.name || !draft.name.trim()){ toast('Source name is required'); return; }
+  const cleanDraft = {...draft};
+  delete cleanDraft._new;
+  // Use name as id for consistency (matching how sources are looked up)
+  cleanDraft.id = cleanDraft.name;
+  // Remove temp placeholder if new
+  if(draft._new){
+    const tempIdx = govDocs.findIndex(g => g.id === id);
+    if(tempIdx > -1) govDocs.splice(tempIdx, 1);
+  }
+  const idx = govDocs.findIndex(g => g.id === cleanDraft.id);
+  if(idx > -1) govDocs[idx] = cleanDraft;
+  else govDocs.push(cleanDraft);
   govDirty.delete(id);
+  govEditingSource = cleanDraft.id;
   saveGovDocs(govDocs);
   populateAdminSourceFilter();
   renderGovSourceList();
@@ -2239,12 +2257,20 @@ function govSaveSource(id){
   if(adminEditing) populateSourceDropdown(getDraft(adminEditing)?.source);
   document.getElementById('adminSaveStatus').textContent =
     (adminDirty.size + govDirty.size) > 0 ? `${adminDirty.size+govDirty.size} unsaved changes` : '✓ All saved';
-  toast(`"${draft.name}" saved`);
+  toast(`"${cleanDraft.name}" saved`);
 }
 
 function govDiscardSource(id){
+  const wasNew = govDraft[id] && govDraft[id]._new;
   delete govDraft[id];
   govDirty.delete(id);
+  if(wasNew){
+    govEditingSource = null;
+    renderGovSourceList();
+    document.getElementById('govSourceEditor').innerHTML =
+      '<div style="display:flex;align-items:center;justify-content:center;height:100%;color:var(--text3);font-family:var(--mono);font-size:12px">Select a source to edit it</div>';
+    return;
+  }
   renderGovSourceList();
   renderGovEditor(id);
 }
@@ -2266,8 +2292,8 @@ function govDeleteSource(id){
 
 function govNewSource(){
   const newId = 'new-gov-' + Date.now();
-  const newDoc = { id: newId, name: 'New Source Document', abbrev: '', color: '#4b5563', description: '', url: '' };
-  govDocs.push(newDoc);
+  const newDoc = { id: newId, name: '', abbrev: '', color: '#4b5563', description: '', url: '', _new: true };
+  // Do NOT push to govDocs — only lives in draft until saved
   govDraft[newId] = JSON.parse(JSON.stringify(newDoc));
   govDirty.add(newId);
   govEditingSource = newId;

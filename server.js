@@ -233,7 +233,7 @@ app.post('/api/import/:collection', (req, res) => {
           const existing = stmtFind.get(termId);
           if (!existing) {
             const id = incoming.id || incoming.term;
-            const clean = Object.assign({}, incoming, { id });
+            const clean = Object.assign({}, incoming, { id, authoritative: true });
             delete clean._new;
             stmtInsert.run(id, JSON.stringify(clean));
             stats.inserted++;
@@ -254,7 +254,7 @@ app.post('/api/import/:collection', (req, res) => {
                   source: incomingSource,
                   section: incoming.section || '',
                   rawDef: incoming.rawDef || '',
-                  authoritative: incoming.authoritative === true
+                  authoritative: false
                 });
                 existingData.alsoIn = alsoIn;
                 if (incoming.aliases && incoming.aliases.length) {

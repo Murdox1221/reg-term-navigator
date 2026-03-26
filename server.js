@@ -1,5 +1,17 @@
 'use strict';
 
+process.on('uncaughtException', (err) => {
+  console.error('UNCAUGHT EXCEPTION:', err.message);
+  console.error(err.stack);
+  process.exit(1);
+});
+
+process.on('unhandledRejection', (reason) => {
+  console.error('UNHANDLED REJECTION:', reason);
+  process.exit(1);
+});
+
+console.log('server.js starting...');
 const express = require('express');
 const fs      = require('fs');
 const path    = require('path');
